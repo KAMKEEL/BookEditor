@@ -14,13 +14,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
 import kamkeel.plugeditor.gui.GuiPlugBook;
 
-@Mod(modid = "PlugEditor", version = "1.1", name = "PlugEditor")
+import static kamkeel.plugeditor.PlugEditor.*;
+
+@Mod(modid = MODID, version = VERSION, name = NAME)
 public class PlugEditor {
-    public static final String MODID = "PlugEditor";
-
-    public static final String VERSION = "1.1";
-
-    public static final String NAME = "PlugEditor";
+    public static final String MODID = "plugeditor";
+    public static final String VERSION = "1.2";
+    public static final String NAME = "Plug Editor";
 
     private Minecraft mc = Minecraft.getMinecraft();
 
