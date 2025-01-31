@@ -167,17 +167,42 @@ public class Line {
     }
 
     public static int getStringWidth(String text) {
+        FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
+
         int width = 0;
+        boolean boldActive = false;
+
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
 
-            if (c == '\u00a7') {
-                if (i < text.length() - 1) {
-                    i += 1;
+            if (c == '\u00a7' && i < text.length() - 1) {
+                // Found a formatting code
+                char code = text.charAt(++i);
+
+                if (code == 'l' || code == 'L') {
+                    // Turn bold on
+                    boldActive = true;
+                } else if (code == 'r' || code == 'R') {
+                    // Reset formatting
+                    boldActive = false;
+                } else if (isFormatColor(code)) {
+                    // A color code typically resets bold
+                    boldActive = false;
+                } else if (isFormatSpecial(code)) {
+                    // If it's 'k','m','n','o' etc... check if it is bold
+                    if (code == 'l' || code == 'L') {
+                        boldActive = true;
+                    }
                 }
+                // We skip actually adding width for these codes
             } else {
-                // If not a color code, calculate the width
-                width += (Minecraft.getMinecraft()).fontRenderer.getCharWidth(c);
+                // A normal character
+                int charWidth = fr.getCharWidth(c);
+                if (boldActive && charWidth > 0) {
+                    // Extra pixel for a bolded char
+                    charWidth++;
+                }
+                width += charWidth;
             }
         }
         return width;
