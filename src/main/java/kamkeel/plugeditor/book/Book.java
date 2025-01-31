@@ -142,41 +142,89 @@ public class Book {
     }
 
     public void removeChar(boolean nextChar) {
-        Line currLine = ((Page) this.pages.get(this.cursorPage)).lines.get(this.cursorLine);
+        // Retrieve current line
+        Line currLine = this.pages.get(this.cursorPage).lines.get(this.cursorLine);
+
         if (nextChar) {
+            // =============================
+            // "Forward delete" logic (unchanged)
+            // =============================
             if (this.cursorPosChars < currLine.text.length()) {
-                if (this.cursorPosChars + 1 < currLine.text.length() && currLine.text.charAt(this.cursorPosChars) == '\u00a7' && (Line.isFormatColor(currLine.text.charAt(this.cursorPosChars + 1)) || Line.isFormatSpecial(currLine.text.charAt(this.cursorPosChars + 1)))) {
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage, this.cursorLine, this.cursorPosChars + 2);
+                // If there's a color code at cursorPosChars...
+                if (this.cursorPosChars + 1 < currLine.text.length()
+                        && currLine.text.charAt(this.cursorPosChars) == '\u00a7'
+                        && (Line.isFormatColor(currLine.text.charAt(this.cursorPosChars + 1))
+                        || Line.isFormatSpecial(currLine.text.charAt(this.cursorPosChars + 1)))) {
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                            this.cursorPage, this.cursorLine, this.cursorPosChars + 2);
                 } else {
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage, this.cursorLine, this.cursorPosChars + 1);
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                            this.cursorPage, this.cursorLine, this.cursorPosChars + 1);
                 }
-            } else if (this.cursorLine + 1 < ((Page) this.pages.get(this.cursorPage)).lines.size()) {
+            }
+            else if (this.cursorLine + 1 < this.pages.get(this.cursorPage).lines.size()) {
+                // If we're at the end of the line but there's another line below
                 int toLine = this.cursorLine + 1;
-                if (((Line) ((Page) this.pages.get(this.cursorPage)).lines.get(toLine)).text.length() >= 1)
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage, toLine, 1);
-            } else if (this.cursorPage + 1 < this.pages.size()) {
+                if (this.pages.get(this.cursorPage).lines.get(toLine).text.length() >= 1) {
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                            this.cursorPage, toLine, 1);
+                }
+            }
+            else if (this.cursorPage + 1 < this.pages.size()) {
+                // If we’re at the end of the last line, check the next page
                 Page nextPage = this.pages.get(this.cursorPage + 1);
                 if (nextPage.asString().isEmpty()) {
                     this.pages.remove(this.cursorPage + 1);
                 } else {
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage + 1, 0, 1);
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                            this.cursorPage + 1, 0, 1);
                 }
             }
-        } else if (this.cursorPosChars > 0) {
-            char charToLeft = currLine.text.charAt(this.cursorPosChars - 1);
-            if (this.cursorPosChars > 1 && (Line.isFormatColor(charToLeft) || Line.isFormatSpecial(charToLeft)) && currLine.text.charAt(this.cursorPosChars - 2) == '\u00a7') {
-                removeText(this.cursorPage, this.cursorLine, this.cursorPosChars - 2, this.cursorPage, this.cursorLine, this.cursorPosChars);
-            } else {
-                removeText(this.cursorPage, this.cursorLine, this.cursorPosChars - 1, this.cursorPage, this.cursorLine, this.cursorPosChars);
+        }
+        else {
+            // =============================
+            // "Backspace" logic (UPDATED)
+            // =============================
+            if (this.cursorPosChars > 0) {
+                // We'll scan backwards from (cursorPosChars - 1)
+                // to remove ALL consecutive color codes "§x" right behind the cursor.
+                int removeStart = this.cursorPosChars - 1;
+
+                while (removeStart > 0) {
+                    // Check if the two preceding chars are "§" plus a valid code
+                    if (currLine.text.charAt(removeStart - 1) == '\u00a7') {
+                        char codeChar = currLine.text.charAt(removeStart);
+                        if (Line.isFormatColor(codeChar) || Line.isFormatSpecial(codeChar)) {
+                            // Step back 2 more chars to delete the entire "§x"
+                            removeStart -= 2;
+                        } else {
+                            // Found '§' but the next char isn’t a recognized format code
+                            break;
+                        }
+                    } else {
+                        // The char behind removeStart wasn't '§'
+                        break;
+                    }
+                }
+
+                // Remove everything from 'removeStart' up to 'cursorPosChars'
+                removeText(this.cursorPage, this.cursorLine, removeStart,
+                        this.cursorPage, this.cursorLine, this.cursorPosChars);
             }
-        } else if (this.cursorLine > 0) {
-            currLine = ((Page) this.pages.get(this.cursorPage)).lines.get(this.cursorLine - 1);
-            removeText(this.cursorPage, this.cursorLine - 1, currLine.text.length() - 1, this.cursorPage, this.cursorLine, this.cursorPosChars);
-        } else if (this.cursorPage > 0) {
-            Page currPage = this.pages.get(this.cursorPage - 1);
-            int lineNum = currPage.lines.size() - 1;
-            currLine = currPage.lines.get(lineNum);
-            removeText(this.cursorPage - 1, lineNum, currLine.text.length() - 1, this.cursorPage, this.cursorLine, this.cursorPosChars);
+            else if (this.cursorLine > 0) {
+                // Backspace at the start of a line:  join with previous line
+                currLine = this.pages.get(this.cursorPage).lines.get(this.cursorLine - 1);
+                removeText(this.cursorPage, this.cursorLine - 1, currLine.text.length() - 1,
+                        this.cursorPage, this.cursorLine, this.cursorPosChars);
+            }
+            else if (this.cursorPage > 0) {
+                // Backspace at the start of the first line in the page: join with previous page
+                Page currPage = this.pages.get(this.cursorPage - 1);
+                int lineNum = currPage.lines.size() - 1;
+                currLine = currPage.lines.get(lineNum);
+                removeText(this.cursorPage - 1, lineNum, currLine.text.length() - 1,
+                        this.cursorPage, this.cursorLine, this.cursorPosChars);
+            }
         }
     }
 
