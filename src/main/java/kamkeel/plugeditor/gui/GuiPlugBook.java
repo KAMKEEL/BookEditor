@@ -9,7 +9,7 @@ import kamkeel.plugeditor.Printer;
 import kamkeel.plugeditor.book.Book;
 import kamkeel.plugeditor.book.Line;
 import kamkeel.plugeditor.book.Page;
-import kamkeel.plugeditor.constants.ButtonIds;
+import kamkeel.plugeditor.constants.Buttons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -134,13 +134,13 @@ public class GuiPlugBook extends GuiScreen {
     public int getColorButX(int buttonNum) {
         int middle = this.width / 2;
         int leftMost = middle - 160;
-        return leftMost + 20 * (buttonNum - ButtonIds.BTN_BLACK);
+        return leftMost + 20 * (buttonNum - Buttons.BTN_BLACK);
     }
 
     public int getFormatButX(int buttonNum) {
         int middle = this.width / 2;
         int leftMost = middle - 100;
-        return leftMost + 20 * (buttonNum - ButtonIds.BTN_OBFUSCATED);
+        return leftMost + 20 * (buttonNum - Buttons.BTN_OBFUSCATED);
     }
 
     @Override
@@ -154,58 +154,58 @@ public class GuiPlugBook extends GuiScreen {
 
         // Add buttons specific to writable books.
         if (this.heldBookIsWritable) {
-            this.buttonList.add(new GuiButton(ButtonIds.BTN_SIGN, 5, 50, buttonWidth, buttonHeight, "Sign"));
-            this.buttonList.add(new GuiButton(ButtonIds.BTN_DONE, 5, 75, buttonWidth, buttonHeight, "Done"));
-            this.buttonList.add(this.btnCutMultiplePages = new GuiButton(ButtonIds.BTN_CUT_MULTIPLE_PAGES, rightXPos, 90, buttonWidth, buttonHeight, "Cut This Page"));
-            this.buttonList.add(this.btnPasteBook = new GuiButton(ButtonIds.BTN_PASTE_BOOK, rightXPos, 25, buttonWidth, buttonHeight, "Paste Book"));
-            this.buttonList.add(this.btnPasteMultiplePages = new GuiButton(ButtonIds.BTN_PASTE_MULTIPLE_PAGES, rightXPos, 110, buttonWidth, buttonHeight, "Paste Page"));
-            this.buttonList.add(this.btnInsertPage = new GuiButton(ButtonIds.BTN_INSERT_PAGE, rightXPos, 135, buttonWidth, buttonHeight, "Insert Page"));
-            this.buttonList.add(new GuiButton(ButtonIds.BTN_LOAD_BOOK, 5, 25, buttonWidth, buttonHeight, "Load Book"));
+            this.buttonList.add(new GuiButton(Buttons.BTN_SIGN, 5, 50, buttonWidth, buttonHeight, "Sign"));
+            this.buttonList.add(new GuiButton(Buttons.BTN_DONE, 5, 75, buttonWidth, buttonHeight, "Done"));
+            this.buttonList.add(this.btnCutMultiplePages = new GuiButton(Buttons.BTN_CUT_MULTIPLE_PAGES, rightXPos, 90, buttonWidth, buttonHeight, "Cut This Page"));
+            this.buttonList.add(this.btnPasteBook = new GuiButton(Buttons.BTN_PASTE_BOOK, rightXPos, 25, buttonWidth, buttonHeight, "Paste Book"));
+            this.buttonList.add(this.btnPasteMultiplePages = new GuiButton(Buttons.BTN_PASTE_MULTIPLE_PAGES, rightXPos, 110, buttonWidth, buttonHeight, "Paste Page"));
+            this.buttonList.add(this.btnInsertPage = new GuiButton(Buttons.BTN_INSERT_PAGE, rightXPos, 135, buttonWidth, buttonHeight, "Insert Page"));
+            this.buttonList.add(new GuiButton(Buttons.BTN_LOAD_BOOK, 5, 25, buttonWidth, buttonHeight, "Load Book"));
 
             // Add formatting buttons for colors and styles.
             int colorButY = this.height - 40;
             int formatButY = this.height - 20;
-            this.buttonList.add(this.btnBlack = new GuiButton(ButtonIds.BTN_BLACK, getColorButX(ButtonIds.BTN_BLACK), colorButY, 20, 20, "\u00a70A"));
-            this.buttonList.add(this.btnDarkBlue = new GuiButton(ButtonIds.BTN_DARK_BLUE, getColorButX(ButtonIds.BTN_DARK_BLUE), colorButY, 20, 20, "\u00a71A"));
-            this.buttonList.add(this.btnDarkGreen = new GuiButton(ButtonIds.BTN_DARK_GREEN, getColorButX(ButtonIds.BTN_DARK_GREEN), colorButY, 20, 20, "\u00a72A"));
-            this.buttonList.add(this.btnDarkAqua = new GuiButton(ButtonIds.BTN_DARK_AQUA, getColorButX(ButtonIds.BTN_DARK_AQUA), colorButY, 20, 20, "\u00a73A"));
-            this.buttonList.add(this.btnDarkRed = new GuiButton(ButtonIds.BTN_DARK_RED, getColorButX(ButtonIds.BTN_DARK_RED), colorButY, 20, 20, "\u00a74A"));
-            this.buttonList.add(this.btnDarkPurple = new GuiButton(ButtonIds.BTN_DARK_PURPLE, getColorButX(ButtonIds.BTN_DARK_PURPLE), colorButY, 20, 20, "\u00a75A"));
-            this.buttonList.add(this.btnGold = new GuiButton(ButtonIds.BTN_GOLD, getColorButX(ButtonIds.BTN_GOLD), colorButY, 20, 20, "\u00a76A"));
-            this.buttonList.add(this.btnGray = new GuiButton(ButtonIds.BTN_GRAY, getColorButX(ButtonIds.BTN_GRAY), colorButY, 20, 20, "\u00a77A"));
-            this.buttonList.add(this.btnDarkGray = new GuiButton(ButtonIds.BTN_DARK_GRAY, getColorButX(ButtonIds.BTN_DARK_GRAY), colorButY, 20, 20, "\u00a78A"));
-            this.buttonList.add(this.btnBlue = new GuiButton(ButtonIds.BTN_BLUE, getColorButX(ButtonIds.BTN_BLUE), colorButY, 20, 20, "\u00a79A"));
-            this.buttonList.add(this.btnGreen = new GuiButton(ButtonIds.BTN_GREEN, getColorButX(ButtonIds.BTN_GREEN), colorButY, 20, 20, "\u00a7aA"));
-            this.buttonList.add(this.btnAqua = new GuiButton(ButtonIds.BTN_AQUA, getColorButX(ButtonIds.BTN_AQUA), colorButY, 20, 20, "\u00a7bA"));
-            this.buttonList.add(this.btnRed = new GuiButton(ButtonIds.BTN_RED, getColorButX(ButtonIds.BTN_RED), colorButY, 20, 20, "\u00a7cA"));
-            this.buttonList.add(this.btnLightPurple = new GuiButton(ButtonIds.BTN_LIGHT_PURPLE, getColorButX(ButtonIds.BTN_LIGHT_PURPLE), colorButY, 20, 20, "\u00a7dA"));
-            this.buttonList.add(this.btnYellow = new GuiButton(ButtonIds.BTN_YELLOW, getColorButX(ButtonIds.BTN_YELLOW), colorButY, 20, 20, "\u00a7eA"));
-            this.buttonList.add(this.btnWhite = new GuiButton(ButtonIds.BTN_WHITE, getColorButX(ButtonIds.BTN_WHITE), colorButY, 20, 20, "\u00a7fA"));
-            this.buttonList.add(this.btnObfuscated = new GuiButton(ButtonIds.BTN_OBFUSCATED, getFormatButX(ButtonIds.BTN_OBFUSCATED), formatButY, 20, 20, "#"));
-            this.buttonList.add(this.btnBold = new GuiButton(ButtonIds.BTN_BOLD, getFormatButX(ButtonIds.BTN_BOLD), formatButY, 20, 20, "\u00a7lB"));
-            this.buttonList.add(this.btnStrikethrough = new GuiButton(ButtonIds.BTN_STRIKETHROUGH, getFormatButX(ButtonIds.BTN_STRIKETHROUGH), formatButY, 20, 20, "\u00a7mS"));
-            this.buttonList.add(this.btnUnderline = new GuiButton(ButtonIds.BTN_UNDERLINE, getFormatButX(ButtonIds.BTN_UNDERLINE), formatButY, 20, 20, "\u00a7nU"));
-            this.buttonList.add(this.btnItalic = new GuiButton(ButtonIds.BTN_ITALIC, getFormatButX(ButtonIds.BTN_ITALIC), formatButY, 20, 20, "\u00a7oI"));
-            this.buttonList.add(this.btnResetFormat = new GuiButton(ButtonIds.BTN_RESET_FORMAT, getFormatButX(ButtonIds.BTN_RESET_FORMAT), formatButY, 100, 20, "Reset Formatting"));
+            this.buttonList.add(this.btnBlack = new GuiButton(Buttons.BTN_BLACK, getColorButX(Buttons.BTN_BLACK), colorButY, 20, 20, "\u00a70A"));
+            this.buttonList.add(this.btnDarkBlue = new GuiButton(Buttons.BTN_DARK_BLUE, getColorButX(Buttons.BTN_DARK_BLUE), colorButY, 20, 20, "\u00a71A"));
+            this.buttonList.add(this.btnDarkGreen = new GuiButton(Buttons.BTN_DARK_GREEN, getColorButX(Buttons.BTN_DARK_GREEN), colorButY, 20, 20, "\u00a72A"));
+            this.buttonList.add(this.btnDarkAqua = new GuiButton(Buttons.BTN_DARK_AQUA, getColorButX(Buttons.BTN_DARK_AQUA), colorButY, 20, 20, "\u00a73A"));
+            this.buttonList.add(this.btnDarkRed = new GuiButton(Buttons.BTN_DARK_RED, getColorButX(Buttons.BTN_DARK_RED), colorButY, 20, 20, "\u00a74A"));
+            this.buttonList.add(this.btnDarkPurple = new GuiButton(Buttons.BTN_DARK_PURPLE, getColorButX(Buttons.BTN_DARK_PURPLE), colorButY, 20, 20, "\u00a75A"));
+            this.buttonList.add(this.btnGold = new GuiButton(Buttons.BTN_GOLD, getColorButX(Buttons.BTN_GOLD), colorButY, 20, 20, "\u00a76A"));
+            this.buttonList.add(this.btnGray = new GuiButton(Buttons.BTN_GRAY, getColorButX(Buttons.BTN_GRAY), colorButY, 20, 20, "\u00a77A"));
+            this.buttonList.add(this.btnDarkGray = new GuiButton(Buttons.BTN_DARK_GRAY, getColorButX(Buttons.BTN_DARK_GRAY), colorButY, 20, 20, "\u00a78A"));
+            this.buttonList.add(this.btnBlue = new GuiButton(Buttons.BTN_BLUE, getColorButX(Buttons.BTN_BLUE), colorButY, 20, 20, "\u00a79A"));
+            this.buttonList.add(this.btnGreen = new GuiButton(Buttons.BTN_GREEN, getColorButX(Buttons.BTN_GREEN), colorButY, 20, 20, "\u00a7aA"));
+            this.buttonList.add(this.btnAqua = new GuiButton(Buttons.BTN_AQUA, getColorButX(Buttons.BTN_AQUA), colorButY, 20, 20, "\u00a7bA"));
+            this.buttonList.add(this.btnRed = new GuiButton(Buttons.BTN_RED, getColorButX(Buttons.BTN_RED), colorButY, 20, 20, "\u00a7cA"));
+            this.buttonList.add(this.btnLightPurple = new GuiButton(Buttons.BTN_LIGHT_PURPLE, getColorButX(Buttons.BTN_LIGHT_PURPLE), colorButY, 20, 20, "\u00a7dA"));
+            this.buttonList.add(this.btnYellow = new GuiButton(Buttons.BTN_YELLOW, getColorButX(Buttons.BTN_YELLOW), colorButY, 20, 20, "\u00a7eA"));
+            this.buttonList.add(this.btnWhite = new GuiButton(Buttons.BTN_WHITE, getColorButX(Buttons.BTN_WHITE), colorButY, 20, 20, "\u00a7fA"));
+            this.buttonList.add(this.btnObfuscated = new GuiButton(Buttons.BTN_OBFUSCATED, getFormatButX(Buttons.BTN_OBFUSCATED), formatButY, 20, 20, "#"));
+            this.buttonList.add(this.btnBold = new GuiButton(Buttons.BTN_BOLD, getFormatButX(Buttons.BTN_BOLD), formatButY, 20, 20, "\u00a7lB"));
+            this.buttonList.add(this.btnStrikethrough = new GuiButton(Buttons.BTN_STRIKETHROUGH, getFormatButX(Buttons.BTN_STRIKETHROUGH), formatButY, 20, 20, "\u00a7mS"));
+            this.buttonList.add(this.btnUnderline = new GuiButton(Buttons.BTN_UNDERLINE, getFormatButX(Buttons.BTN_UNDERLINE), formatButY, 20, 20, "\u00a7nU"));
+            this.buttonList.add(this.btnItalic = new GuiButton(Buttons.BTN_ITALIC, getFormatButX(Buttons.BTN_ITALIC), formatButY, 20, 20, "\u00a7oI"));
+            this.buttonList.add(this.btnResetFormat = new GuiButton(Buttons.BTN_RESET_FORMAT, getFormatButX(Buttons.BTN_RESET_FORMAT), formatButY, 100, 20, "Reset Formatting"));
         } else {
             // Non-writable books only have a Done button.
-            this.buttonList.add(new GuiButton(ButtonIds.BTN_DONE, this.width / 2 - 100, 4 + this.bookImageHeight, 200, 20, "Done"));
+            this.buttonList.add(new GuiButton(Buttons.BTN_DONE, this.width / 2 - 100, 4 + this.bookImageHeight, 200, 20, "Done"));
         }
 
         // Buttons common to both writable and non-writable books.
-        this.buttonList.add(new GuiButton(ButtonIds.BTN_SAVE_BOOK, 5, 5, buttonWidth, buttonHeight, "Save Book"));
-        this.buttonList.add(new GuiButton(ButtonIds.BTN_COPY_BOOK, rightXPos, 5, buttonWidth, buttonHeight, "Copy Book"));
+        this.buttonList.add(new GuiButton(Buttons.BTN_SAVE_BOOK, 5, 5, buttonWidth, buttonHeight, "Save Book"));
+        this.buttonList.add(new GuiButton(Buttons.BTN_COPY_BOOK, rightXPos, 5, buttonWidth, buttonHeight, "Copy Book"));
 
         // Page selection buttons
-        this.buttonList.add(this.btnSelectPageA = new GuiButton(ButtonIds.BTN_SELECT_PAGE_A, rightXPos, 50, buttonWidth / 2, buttonHeight, "A"));
+        this.buttonList.add(this.btnSelectPageA = new GuiButton(Buttons.BTN_SELECT_PAGE_A, rightXPos, 50, buttonWidth / 2, buttonHeight, "A"));
         this.btnSelectPageA.visible = heldBookIsWritable;
-        this.buttonList.add(this.btnSelectPageB = new GuiButton(ButtonIds.BTN_SELECT_PAGE_B, rightXPos + buttonWidth / 2, 50, buttonWidth / 2, buttonHeight, "B"));
+        this.buttonList.add(this.btnSelectPageB = new GuiButton(Buttons.BTN_SELECT_PAGE_B, rightXPos + buttonWidth / 2, 50, buttonWidth / 2, buttonHeight, "B"));
         this.btnSelectPageB.visible = heldBookIsWritable;
-        this.buttonList.add(this.btnCopySelectedPages = new GuiButton(ButtonIds.BTN_COPY_SELECTED_PAGES, rightXPos, 70, buttonWidth, buttonHeight, "Copy This Page"));
+        this.buttonList.add(this.btnCopySelectedPages = new GuiButton(Buttons.BTN_COPY_SELECTED_PAGES, rightXPos, 70, buttonWidth, buttonHeight, "Copy This Page"));
 
         int bookLeftSide = (this.width - this.bookImageWidth) / 2;
-        this.buttonList.add(this.btnNextPage = new NextPageButton(ButtonIds.BTN_NEXT_PAGE, bookLeftSide + 120, 156, true));
-        this.buttonList.add(this.btnPreviousPage = new NextPageButton(ButtonIds.BTN_PREVIOUS_PAGE, bookLeftSide + 38, 156, false));
+        this.buttonList.add(this.btnNextPage = new NextPageButton(Buttons.BTN_NEXT_PAGE, bookLeftSide + 120, 156, true));
+        this.buttonList.add(this.btnPreviousPage = new NextPageButton(Buttons.BTN_PREVIOUS_PAGE, bookLeftSide + 38, 156, false));
     }
 
     @Override
@@ -225,19 +225,19 @@ public class GuiPlugBook extends GuiScreen {
         File signatureFile;
         Book signature;
         switch (buttonPressed.id) {
-            case ButtonIds.BTN_NEXT_PAGE:
+            case Buttons.BTN_NEXT_PAGE:
                 // Prevent advancing past the last page.
                 if (this.book.cursorPage < this.book.totalPages() - 1) {
                     this.book.turnPage(1);
                 }
                 break;
-            case ButtonIds.BTN_PREVIOUS_PAGE:
+            case Buttons.BTN_PREVIOUS_PAGE:
                 this.book.turnPage(-1);
                 break;
-            case ButtonIds.BTN_DONE:
+            case Buttons.BTN_DONE:
                 this.mc.displayGuiScreen(null);
                 break;
-            case ButtonIds.BTN_SIGN:
+            case Buttons.BTN_SIGN:
                 if (this.heldBookIsWritable) {
                     // Truncate title and author if needed before signing.
                     this.book.title = Book.truncateStringChars(this.book.title, "..", 16, false);
@@ -245,29 +245,29 @@ public class GuiPlugBook extends GuiScreen {
                     this.mc.displayGuiScreen(new GuiSignPlugBook(this.book, this));
                 }
                 break;
-            case ButtonIds.BTN_SAVE_BOOK:
+            case Buttons.BTN_SAVE_BOOK:
                 this.fileHandler.saveBookToGHBFile(this.book);
                 break;
-            case ButtonIds.BTN_LOAD_BOOK:
+            case Buttons.BTN_LOAD_BOOK:
                 this.mc.displayGuiScreen(new GuiFileBrowser(this));
                 break;
-            case ButtonIds.BTN_COPY_BOOK:
+            case Buttons.BTN_COPY_BOOK:
                 this.bookClipboard.clone(this.book);
                 break;
-            case ButtonIds.BTN_PASTE_BOOK:
+            case Buttons.BTN_PASTE_BOOK:
                 if (this.bookClipboard != null) {
                     this.book.clone(this.bookClipboard);
                 } else {
                     Printer.gamePrint(Printer.RED + "Clipboard is empty... Returning null...");
                 }
                 break;
-            case ButtonIds.BTN_SELECT_PAGE_A:
+            case Buttons.BTN_SELECT_PAGE_A:
                 this.selectedPageA = this.book.cursorPage;
                 break;
-            case ButtonIds.BTN_SELECT_PAGE_B:
+            case Buttons.BTN_SELECT_PAGE_B:
                 this.selectedPageB = this.book.cursorPage;
                 break;
-            case ButtonIds.BTN_COPY_SELECTED_PAGES:
+            case Buttons.BTN_COPY_SELECTED_PAGES:
                 if (this.selectedPageA != -1 && this.selectedPageB != -1
                         && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB
                         && this.selectedPageB < this.book.pages.size()) {
@@ -278,15 +278,15 @@ public class GuiPlugBook extends GuiScreen {
                     this.pageClipboard.addAll(this.book.copyPages(this.book.cursorPage, this.book.cursorPage));
                 }
                 break;
-            case ButtonIds.BTN_PASTE_MULTIPLE_PAGES:
+            case Buttons.BTN_PASTE_MULTIPLE_PAGES:
                 this.book.insertPages(this.book.cursorPage, this.pageClipboard);
                 break;
-            case ButtonIds.BTN_INSERT_PAGE:
+            case Buttons.BTN_INSERT_PAGE:
                 blankPage = new ArrayList<String>();
                 blankPage.add("");
                 this.book.insertPages(this.book.cursorPage, blankPage);
                 break;
-            case ButtonIds.BTN_CUT_MULTIPLE_PAGES:
+            case Buttons.BTN_CUT_MULTIPLE_PAGES:
                 if (this.selectedPageA != -1 && this.selectedPageB != -1
                         && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB
                         && this.selectedPageB < this.book.pages.size()) {
@@ -297,7 +297,7 @@ public class GuiPlugBook extends GuiScreen {
                     this.pageClipboard.addAll(this.book.cutPages(this.book.cursorPage, this.book.cursorPage));
                 }
                 break;
-            case ButtonIds.BTN_ADD_SIGNATURE_PAGES:
+            case Buttons.BTN_ADD_SIGNATURE_PAGES:
                 signatureFile = new File(this.fileHandler.getSignaturePath(), "default.ghb");
                 signature = this.fileHandler.loadBook(signatureFile);
                 if (signature != null) {
@@ -312,8 +312,8 @@ public class GuiPlugBook extends GuiScreen {
                 break;
             default:
                 // Formatting buttons have ids 50-71
-                if (buttonPressed.id >= ButtonIds.BTN_BLACK && buttonPressed.id <= ButtonIds.BTN_RESET_FORMAT) {
-                    int pos = buttonPressed.id - ButtonIds.BTN_BLACK;
+                if (buttonPressed.id >= Buttons.BTN_BLACK && buttonPressed.id <= Buttons.BTN_RESET_FORMAT) {
+                    int pos = buttonPressed.id - Buttons.BTN_BLACK;
                     this.book.addTextAtCursor(FORMAT_CODES[pos]);
                 } else {
                     System.out.println("#################### BUTTON NOT CODED YET!!!!!!!!");
