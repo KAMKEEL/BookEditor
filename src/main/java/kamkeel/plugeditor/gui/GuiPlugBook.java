@@ -1,0 +1,567 @@
+package kamkeel.plugeditor.gui;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import kamkeel.plugeditor.FileHandler;
+import kamkeel.plugeditor.Printer;
+import kamkeel.plugeditor.book.Book;
+import kamkeel.plugeditor.book.Line;
+import kamkeel.plugeditor.book.Page;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StringUtils;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+
+public class GuiPlugBook extends GuiScreen {
+    private Minecraft mc = Minecraft.getMinecraft();
+
+    private int updateCount = 0;
+
+    private int bookImageWidth = 192;
+
+    private int bookImageHeight = 192;
+
+    private static final ResourceLocation bookGuiTextures = new ResourceLocation("textures/gui/book.png");
+
+    private static final String PAGE_INDICATOR_TEMPLATE = "Page %d of %d";
+
+    private int selectedPageA = -1;
+
+    private int selectedPageB = -1;
+
+    private static final int BTN_DONE = 0;
+
+    private static final int BTN_NEXT_PAGE = 1;
+
+    private static final int BTN_PREVIOUS_PAGE = 2;
+
+    private static final int BTN_SIGN = 3;
+
+    private static final int BTN_SAVE_BOOK = 6;
+
+    private static final int BTN_LOAD_BOOK = 7;
+
+    private static final int BTN_COPY_BOOK = 10;
+
+    private static final int BTN_PASTE_BOOK = 11;
+
+    private static final int BTN_CUT_MULTIPLE_PAGES = 14;
+
+    private static final int BTN_SELECT_PAGE_A = 15;
+
+    private static final int BTN_SELECT_PAGE_B = 16;
+
+    private static final int BTN_COPY_SELECTED_PAGES = 17;
+
+    private static final int BTN_PASTE_MULTIPLE_PAGES = 18;
+
+    private static final int BTN_INSERT_PAGE = 19;
+
+    private static final int BTN_ADD_SIGNATURE_PAGES = 21;
+
+    private static final int BTN_BLACK = 50;
+
+    private static final int BTN_DARK_BLUE = 51;
+
+    private static final int BTN_DARK_GREEN = 52;
+
+    private static final int BTN_DARK_AQUA = 53;
+
+    private static final int BTN_DARK_RED = 54;
+
+    private static final int BTN_DARK_PURPLE = 55;
+
+    private static final int BTN_GOLD = 56;
+
+    private static final int BTN_GRAY = 57;
+
+    private static final int BTN_DARK_GRAY = 58;
+
+    private static final int BTN_BLUE = 59;
+
+    private static final int BTN_GREEN = 60;
+
+    private static final int BTN_AQUA = 61;
+
+    private static final int BTN_RED = 62;
+
+    private static final int BTN_LIGHT_PURPLE = 63;
+
+    private static final int BTN_YELLOW = 64;
+
+    private static final int BTN_WHITE = 65;
+
+    private static final int BTN_OBFUSCATED = 66;
+
+    private static final int BTN_BOLD = 67;
+
+    private static final int BTN_STRIKETHROUGH = 68;
+
+    private static final int BTN_UNDERLINE = 69;
+
+    private static final int BTN_ITALIC = 70;
+
+    private static final int BTN_RESET_FORMAT = 71;
+
+    private static final String[] FORMAT_CODES = new String[]{
+            "\u00a70", "\u00a71", "\u00a72", "\u00a73", "\u00a74", "\u00a75", "\u00a76", "\u00a77", "\u00a78", "\u00a79",
+            "\u00a7a", "\u00a7b", "\u00a7c", "\u00a7d", "\u00a7e", "\u00a7f", "\u00a7k", "\u00a7l", "\u00a7m", "\u00a7n",
+            "\u00a7o", "\u00a7r"};
+
+    private GuiButton btnPasteBook;
+
+    private GuiButton btnCutMultiplePages;
+
+    private GuiButton btnSelectPageA;
+
+    private GuiButton btnSelectPageB;
+
+    private GuiButton btnCopySelectedPages;
+
+    private GuiButton btnPasteMultiplePages;
+
+    private GuiButton btnInsertPage;
+
+    private GuiButton btnBlack;
+
+    private GuiButton btnDarkBlue;
+
+    private GuiButton btnDarkGreen;
+
+    private GuiButton btnDarkAqua;
+
+    private GuiButton btnDarkRed;
+
+    private GuiButton btnDarkPurple;
+
+    private GuiButton btnGold;
+
+    private GuiButton btnGray;
+
+    private GuiButton btnDarkGray;
+
+    private GuiButton btnBlue;
+
+    private GuiButton btnGreen;
+
+    private GuiButton btnAqua;
+
+    private GuiButton btnRed;
+
+    private GuiButton btnLightPurple;
+
+    private GuiButton btnYellow;
+
+    private GuiButton btnWhite;
+
+    private GuiButton btnObfuscated;
+
+    private GuiButton btnBold;
+
+    private GuiButton btnStrikethrough;
+
+    private GuiButton btnUnderline;
+
+    private GuiButton btnItalic;
+
+    private GuiButton btnResetFormat;
+
+    private NextPageButton btnNextPage;
+
+    private NextPageButton btnPreviousPage;
+
+    private Book book = new Book();
+
+    private Book bookClipboard;
+
+    private List<String> pageClipboard;
+
+    private boolean heldBookIsWritable = false;
+
+    private ItemStack mcBookObj;
+
+    private FileHandler fileHandler = new FileHandler();
+
+    public GuiPlugBook(Book _bookClipboard, List<String> _pageClipboard) {
+        this.bookClipboard = _bookClipboard;
+        this.pageClipboard = _pageClipboard;
+        this.mcBookObj = this.mc.thePlayer.getHeldItem();
+        if (this.mcBookObj.getItem().equals(Items.writable_book))
+            this.heldBookIsWritable = true;
+        this.book = new Book();
+        this.book.pages.add(new Page());
+        if (this.mcBookObj.hasTagCompound()) {
+            NBTTagCompound nbttagcompound = this.mcBookObj.getTagCompound();
+            NBTTagList bookPages = nbttagcompound.getTagList("pages", 8);
+            if (bookPages != null) {
+                List<String> pages = new ArrayList<String>();
+                for (int i = 0; i < bookPages.tagCount(); i++)
+                    pages.add(bookPages.getStringTagAt(i));
+                if (pages.size() > 0) {
+                    this.book.clear();
+                    this.book.insertPages(0, pages);
+                }
+            }
+            if (!this.heldBookIsWritable) {
+                String s = nbttagcompound.getString("author");
+                if (!StringUtils.isNullOrEmpty(s))
+                    this.book.author = s;
+                s = nbttagcompound.getString("title");
+                if (!StringUtils.isNullOrEmpty(s))
+                    this.book.title = s;
+            }
+        }
+    }
+
+    public void setBook(Book inBook) {
+        this.book.clone(inBook);
+        this.book.cursorPage = 0;
+        this.book.cursorLine = 0;
+        this.book.cursorPosChars = 0;
+    }
+
+    public int getColorButX(int buttonNum) {
+        int middle = this.width / 2;
+        int leftMost = middle - 160;
+        return leftMost + 20 * (buttonNum - 50);
+    }
+
+    public int getFormatButX(int buttonNum) {
+        int middle = this.width / 2;
+        int leftMost = middle - 100;
+        return leftMost + 20 * (buttonNum - 66);
+    }
+
+    public void initGui() {
+        Keyboard.enableRepeatEvents(true);
+        int buttonWidth = 120;
+        int buttonHeight = 20;
+        int buttonSideOffset = 5;
+        ScaledResolution scaledResolution = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
+        int rightXPos = scaledResolution.getScaledWidth() - buttonWidth + buttonSideOffset - 9;
+        if (this.heldBookIsWritable) {
+            this.buttonList.add(new GuiButton(3, 5, 50, buttonWidth, buttonHeight, "Sign"));
+            this.buttonList.add(new GuiButton(0, 5, 75, buttonWidth, buttonHeight, "Done"));
+            this.buttonList.add(this.btnCutMultiplePages = new GuiButton(14, rightXPos, 90, buttonWidth, buttonHeight, "Cut This Page"));
+            this.buttonList.add(this.btnPasteBook = new GuiButton(11, rightXPos, 25, buttonWidth, buttonHeight, "Paste Book"));
+            this.buttonList.add(this.btnPasteMultiplePages = new GuiButton(18, rightXPos, 110, buttonWidth, buttonHeight, "Paste Page"));
+            this.buttonList.add(this.btnInsertPage = new GuiButton(19, rightXPos, 135, buttonWidth, buttonHeight, "Insert Page"));
+            this.buttonList.add(new GuiButton(7, 5, 25, buttonWidth, buttonHeight, "Load Book"));
+            int colorButY = this.height - 40;
+            int formatButY = this.height - 20;
+            this.buttonList.add(this.btnBlack = new GuiButton(50, getColorButX(50), colorButY, 20, 20, "\u00a70A"));
+            this.buttonList.add(this.btnDarkBlue = new GuiButton(51, getColorButX(51), colorButY, 20, 20, "\u00a71A"));
+            this.buttonList.add(this.btnDarkGreen = new GuiButton(52, getColorButX(52), colorButY, 20, 20, "\u00a72A"));
+            this.buttonList.add(this.btnDarkAqua = new GuiButton(53, getColorButX(53), colorButY, 20, 20, "\u00a73A"));
+            this.buttonList.add(this.btnDarkRed = new GuiButton(54, getColorButX(54), colorButY, 20, 20, "\u00a74A"));
+            this.buttonList.add(this.btnDarkPurple = new GuiButton(55, getColorButX(55), colorButY, 20, 20, "\u00a75A"));
+            this.buttonList.add(this.btnGold = new GuiButton(56, getColorButX(56), colorButY, 20, 20, "\u00a76A"));
+            this.buttonList.add(this.btnGray = new GuiButton(57, getColorButX(57), colorButY, 20, 20, "\u00a77A"));
+            this.buttonList.add(this.btnDarkGray = new GuiButton(58, getColorButX(58), colorButY, 20, 20, "\u00a78A"));
+            this.buttonList.add(this.btnBlue = new GuiButton(59, getColorButX(59), colorButY, 20, 20, "\u00a79A"));
+            this.buttonList.add(this.btnGreen = new GuiButton(60, getColorButX(60), colorButY, 20, 20, "\u00a7aA"));
+            this.buttonList.add(this.btnAqua = new GuiButton(61, getColorButX(61), colorButY, 20, 20, "\u00a7bA"));
+            this.buttonList.add(this.btnRed = new GuiButton(62, getColorButX(62), colorButY, 20, 20, "\u00a7cA"));
+            this.buttonList.add(this.btnLightPurple = new GuiButton(63, getColorButX(63), colorButY, 20, 20, "\u00a7dA"));
+            this.buttonList.add(this.btnYellow = new GuiButton(64, getColorButX(64), colorButY, 20, 20, "\u00a7eA"));
+            this.buttonList.add(this.btnWhite = new GuiButton(65, getColorButX(65), colorButY, 20, 20, "\u00a7fA"));
+            this.buttonList.add(this.btnObfuscated = new GuiButton(66, getFormatButX(66), formatButY, 20, 20, "#"));
+            this.buttonList.add(this.btnBold = new GuiButton(67, getFormatButX(67), formatButY, 20, 20, "\u00a7lB"));
+            this.buttonList.add(this.btnStrikethrough = new GuiButton(68, getFormatButX(68), formatButY, 20, 20, "\u00a7mS"));
+            this.buttonList.add(this.btnUnderline = new GuiButton(69, getFormatButX(69), formatButY, 20, 20, "\u00a7nU"));
+            this.buttonList.add(this.btnItalic = new GuiButton(70, getFormatButX(70), formatButY, 20, 20, "\u00a7oI"));
+            this.buttonList.add(this.btnResetFormat = new GuiButton(71, getFormatButX(71), formatButY, 100, 20, "Reset Formatting"));
+        } else {
+            this.buttonList.add(new GuiButton(0, this.width / 2 - 100, 4 + this.bookImageHeight, 200, 20, "Done"));
+        }
+        this.buttonList.add(new GuiButton(6, 5, 5, buttonWidth, buttonHeight, "Save Book"));
+        this.buttonList.add(new GuiButton(10, rightXPos, 5, buttonWidth, buttonHeight, "Copy Book"));
+
+        this.buttonList.add(this.btnSelectPageA = new GuiButton(15, rightXPos, 50, buttonWidth / 2, buttonHeight, "A"));
+        this.btnSelectPageA.visible = heldBookIsWritable;
+
+        this.buttonList.add(this.btnSelectPageB = new GuiButton(16, rightXPos + buttonWidth / 2, 50, buttonWidth / 2, buttonHeight, "B"));
+        this.btnSelectPageB.visible = heldBookIsWritable;
+
+        this.buttonList.add(this.btnCopySelectedPages = new GuiButton(17, rightXPos, 70, buttonWidth, buttonHeight, "Copy This Page"));
+        int bookLeftSide = (this.width - this.bookImageWidth) / 2;
+        this.buttonList.add(this.btnNextPage = new NextPageButton(1, bookLeftSide + 120, 156, true));
+        this.buttonList.add(this.btnPreviousPage = new NextPageButton(2, bookLeftSide + 38, 156, false));
+    }
+
+    public void onGuiClosed() {
+        Keyboard.enableRepeatEvents(false);
+        if (!this.book.isEmpty() && this.heldBookIsWritable)
+            this.book.sendBookToServer(false);
+    }
+
+    protected void actionPerformed(GuiButton buttonPressed) {
+        List<String> blankPage;
+        File signatureFile;
+        Book signature;
+        if (!buttonPressed.enabled)
+            return;
+        switch (buttonPressed.id) {
+            case 1:
+                this.book.turnPage(1);
+                return;
+            case 2:
+                this.book.turnPage(-1);
+                return;
+            case 0:
+                this.mc.displayGuiScreen((GuiScreen) null);
+                return;
+            case 3:
+                if (this.heldBookIsWritable) {
+                    this.book.title = Book.truncateStringChars(this.book.title, "..", 16, false);
+                    this.book.author = Book.truncateStringChars(this.book.author, "..", 16, false);
+                    this.mc.displayGuiScreen(new GuiSignPlugBook(this.book, this));
+                }
+                return;
+            case 6:
+                this.fileHandler.saveBookToGHBFile(this.book);
+                return;
+            case 7:
+                this.mc.displayGuiScreen(new GuiFileBrowser(this));
+                return;
+            case 10:
+                this.bookClipboard.clone(this.book);
+                return;
+            case 11:
+                if (this.bookClipboard != null) {
+                    this.book.clone(this.bookClipboard);
+                } else {
+                    Printer.gamePrint(Printer.RED + "Clipboard is empty... Returning null...");
+                }
+                return;
+            case 15:
+                this.selectedPageA = this.book.cursorPage;
+                return;
+            case 16:
+                this.selectedPageB = this.book.cursorPage;
+                return;
+            case 17:
+                if (this.selectedPageA != -1 && this.selectedPageB != -1 && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB && this.selectedPageB < this.book.pages.size()) {
+                    this.pageClipboard.clear();
+                    this.pageClipboard.addAll(this.book.copyPages(this.selectedPageA, this.selectedPageB));
+                } else {
+                    this.pageClipboard.clear();
+                    this.pageClipboard.addAll(this.book.copyPages(this.book.cursorPage, this.book.cursorPage));
+                }
+                return;
+            case 18:
+                this.book.insertPages(this.book.cursorPage, this.pageClipboard);
+                return;
+            case 19:
+                blankPage = new ArrayList<String>();
+                blankPage.add("");
+                this.book.insertPages(this.book.cursorPage, blankPage);
+                return;
+            case 14:
+                if (this.selectedPageA != -1 && this.selectedPageB != -1 && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB && this.selectedPageB < this.book.pages.size()) {
+                    this.pageClipboard.clear();
+                    this.pageClipboard.addAll(this.book.cutPages(this.selectedPageA, this.selectedPageB));
+                } else {
+                    this.pageClipboard.clear();
+                    this.pageClipboard.addAll(this.pageClipboard = this.book.cutPages(this.book.cursorPage, this.book.cursorPage));
+                }
+                return;
+            case 21:
+                signatureFile = new File(this.fileHandler.getSignaturePath(), "default.ghb");
+                signature = this.fileHandler.loadBook(signatureFile);
+                if (signature != null) {
+                    List<String> sigPages = new ArrayList<String>();
+                    for (Page page : signature.pages)
+                        sigPages.add(page.asString());
+                    this.book.insertPages(this.book.totalPages(), sigPages);
+                } else {
+                    Printer.gamePrint(Printer.RED + "Signature file couldn't be loaded!");
+                }
+                return;
+        }
+        if (buttonPressed.id >= 50 && buttonPressed.id <= 71) {
+            int pos = buttonPressed.id - 50;
+            this.book.addTextAtCursor(FORMAT_CODES[pos]);
+        } else {
+            System.out.println("#################### BUTTON NOT CODED YET!!!!!!!!");
+        }
+    }
+
+    protected void mouseClicked(int posX, int posY, int button) {
+        int bookLeftSide = (this.width - this.bookImageWidth) / 2;
+        int bookTextLeft = bookLeftSide + 36;
+        int bookTextTop = 33;
+        if (posX >= bookTextLeft && posX < bookTextLeft + 116 && posY >= bookTextTop && posY < bookTextTop + 116) {
+            int rowGuess = (posY - bookTextTop) / 9;
+            Page currPage = this.book.pages.get(this.book.cursorPage);
+            if (rowGuess < 0) {
+                rowGuess = 0;
+            } else if (rowGuess > currPage.lines.size() - 1) {
+                rowGuess = currPage.lines.size() - 1;
+            }
+            this.book.cursorLine = rowGuess;
+            Line currLine = currPage.lines.get(this.book.cursorLine);
+            int xOffset = posX - bookTextLeft;
+            if (xOffset < 0)
+                xOffset = 0;
+            int colGuess = Line.sizeStringToApproxWidthBlind(currLine.getTextWithWrappedFormatting(), xOffset);
+            colGuess -= currLine.wrappedFormatting.length();
+            if (colGuess < 0)
+                colGuess = 0;
+            if (colGuess > 0 && currLine.text.charAt(colGuess - 1) == '\n')
+                colGuess--;
+            this.book.cursorPosChars = colGuess;
+        }
+        super.mouseClicked(posX, posY, button);
+    }
+
+    protected void keyTyped(char character, int keycode) {
+        switch (character) {
+            case '\026':
+                if(this.heldBookIsWritable){
+                    this.book.addTextAtCursor(GuiScreen.getClipboardString());
+                }
+                return;
+        }
+        switch (keycode) {
+            case 203:
+                this.book.moveCursor(Book.CursorDirection.LEFT);
+                return;
+            case 205:
+                this.book.moveCursor(Book.CursorDirection.RIGHT);
+                return;
+            case 200:
+                this.book.moveCursor(Book.CursorDirection.UP);
+                return;
+            case 208:
+                this.book.moveCursor(Book.CursorDirection.DOWN);
+                return;
+            case 14:
+                if(this.heldBookIsWritable){
+                    this.book.removeChar(false);
+                }
+                return;
+            case 211:
+                if(this.heldBookIsWritable){
+                    this.book.removeChar(true);
+                }
+                return;
+            case 28:
+            case 156:
+                if(this.heldBookIsWritable){
+                    this.book.addTextAtCursor("\n");
+                }
+                return;
+            case 1:
+                this.mc.displayGuiScreen((GuiScreen) null);
+                return;
+        }
+        if(this.heldBookIsWritable){
+            if (ChatAllowedCharacters.isAllowedCharacter(character))
+                this.book.addTextAtCursor(Character.toString(character));
+        }
+    }
+
+    public void updateScreen() {
+        super.updateScreen();
+        this.updateCount++;
+    }
+
+    public void drawScreen(int par1, int par2, float par3) {
+        if (this.heldBookIsWritable) {
+            this.btnPasteBook.enabled = !this.bookClipboard.pages.isEmpty();
+            this.btnPasteMultiplePages.enabled = !this.pageClipboard.isEmpty();
+        }
+        if (this.heldBookIsWritable)
+            if (this.btnPasteMultiplePages.enabled) {
+                this.btnPasteMultiplePages.displayString = "Paste " + this.pageClipboard.size() + " Page" + ((this.pageClipboard.size() == 1) ? "" : "s");
+            } else {
+                this.btnPasteMultiplePages.displayString = "Paste Multiple";
+            }
+        if (this.selectedPageA >= this.book.totalPages() || this.selectedPageB >= this.book.totalPages()) {
+            this.selectedPageA = -1;
+            this.selectedPageB = -1;
+        }
+        if (this.selectedPageA != -1 && this.selectedPageB != -1 && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB && this.selectedPageB < this.book.totalPages()) {
+            String xPages = (this.selectedPageB - this.selectedPageA + 1) + " Page" + ((this.selectedPageA != this.selectedPageB) ? "s" : "");
+            this.btnCopySelectedPages.displayString = "Copy " + xPages;
+            if (this.heldBookIsWritable)
+                this.btnCutMultiplePages.displayString = "Cut " + xPages;
+            this.btnSelectPageA.displayString = "A: " + (this.selectedPageA + 1);
+            this.btnSelectPageB.displayString = "B: " + (this.selectedPageB + 1);
+        } else if (this.selectedPageA != -1) {
+            this.btnSelectPageA.displayString = "A: " + (this.selectedPageA + 1);
+            this.btnCopySelectedPages.displayString = "Copy This Page";
+            if (this.heldBookIsWritable)
+                this.btnCutMultiplePages.displayString = "Cut This Page";
+        } else if (this.selectedPageB != -1) {
+            this.btnSelectPageB.displayString = "B: " + (this.selectedPageB + 1);
+            this.btnCopySelectedPages.displayString = "Copy This Page";
+            if (this.heldBookIsWritable)
+                this.btnCutMultiplePages.displayString = "Cut This Page";
+        } else {
+            this.btnCopySelectedPages.displayString = "Copy This Page";
+            if (this.heldBookIsWritable)
+                this.btnCutMultiplePages.displayString = "Cut This Page";
+            this.btnSelectPageA.displayString = "A";
+            this.btnSelectPageB.displayString = "B";
+        }
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(bookGuiTextures);
+        int bookLeftSide = (this.width - this.bookImageWidth) / 2;
+        byte b0 = 2;
+        drawTexturedModalRect(bookLeftSide, b0, 0, 0, this.bookImageWidth, this.bookImageHeight);
+        String currPageText = this.book.getCurrPageAsMCString();
+        this.fontRendererObj.drawSplitString(currPageText, bookLeftSide + 36, b0 + 16 + 16, 116, 0);
+        String pageIndicator = String.format("Page %d of %d", new Object[]{Integer.valueOf(this.book.cursorPage + 1), Integer.valueOf(this.book.totalPages())});
+        int pageIndicatorWidth = this.fontRendererObj.getStringWidth(pageIndicator);
+        this.fontRendererObj.drawString(pageIndicator, bookLeftSide - pageIndicatorWidth + this.bookImageWidth - 44, b0 + 16, 0);
+        int cursorX1 = bookLeftSide + 35 + this.book.getCursorX();
+        int cursorX2 = cursorX1 + 1;
+        int cursorY1 = 33 + 9 * this.book.cursorLine;
+        int cursorY2 = cursorY1 + 9;
+        byte phase = (byte) (this.updateCount / 10 % 2);
+        int cursorColor = -16777216;
+        if (phase == 1)
+            cursorColor = -6645094;
+
+        if(this.heldBookIsWritable)
+            drawRect(cursorX1, cursorY1, cursorX2, cursorY2, cursorColor);
+        super.drawScreen(par1, par2, par3);
+    }
+
+    static class NextPageButton extends GuiButton {
+        private final boolean isRightArrow;
+
+        public NextPageButton(int par1, int par2, int par3, boolean par4) {
+            super(par1, par2, par3, 23, 13, "");
+            this.isRightArrow = par4;
+        }
+
+        public void drawButton(Minecraft mc, int p_146112_2_, int p_146112_3_) {
+            if (this.visible) {
+                boolean flag = (p_146112_2_ >= this.xPosition && p_146112_3_ >= this.yPosition && p_146112_2_ < this.xPosition + this.width && p_146112_3_ < this.yPosition + this.height);
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                mc.getTextureManager().bindTexture(GuiPlugBook.bookGuiTextures);
+                int k = 0;
+                int l = 192;
+                if (flag)
+                    k += 23;
+                if (!this.isRightArrow)
+                    l += 13;
+                drawTexturedModalRect(this.xPosition, this.yPosition, k, l, 23, 13);
+            }
+        }
+    }
+}

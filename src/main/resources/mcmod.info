@@ -1,0 +1,16 @@
+[
+{
+  "modid": "bookeditor",
+  "name": "BookEditor",
+  "description": "Utility for dealing with books (backup, restore, copy, paste, etc.).",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["waffle_stomper", "Kamkeel"],
+  "credits": "The Forge team for making my life a lot easier",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
