@@ -1,7 +1,7 @@
 package kamkeel.plugeditor.gui;
 
 import kamkeel.plugeditor.book.Book;
-import kamkeel.plugeditor.constants.Buttons;
+import kamkeel.plugeditor.constants.ButtonIds;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -28,8 +28,8 @@ public class GuiSignPlugBook extends GuiScreen {
 
     @Override
     public void initGui() {
-        this.buttonList.add(this.btnFinalise = new GuiButton(Buttons.BTN_SIGN_FINALISE, this.width / 2 - 100, 4 + this.bookImageHeight, 98, 20, "Finalise"));
-        this.buttonList.add(new GuiButton(Buttons.BTN_SIGN_CANCEL, this.width / 2 + 2, 4 + this.bookImageHeight, 98, 20, "Cancel"));
+        this.buttonList.add(this.btnFinalise = new GuiButton(ButtonIds.BTN_SIGN_FINALISE, this.width / 2 - 100, 4 + this.bookImageHeight, 98, 20, "Finalise"));
+        this.buttonList.add(new GuiButton(ButtonIds.BTN_SIGN_CANCEL, this.width / 2 + 2, 4 + this.bookImageHeight, 98, 20, "Cancel"));
         updateButtons();
     }
 
@@ -38,10 +38,10 @@ public class GuiSignPlugBook extends GuiScreen {
         if (!buttonPressed.enabled)
             return;
         switch (buttonPressed.id) {
-            case Buttons.BTN_SIGN_CANCEL:
+            case ButtonIds.BTN_SIGN_CANCEL:
                 goBackToParentScreen();
                 break;
-            case Buttons.BTN_SIGN_FINALISE:
+            case ButtonIds.BTN_SIGN_FINALISE:
                 this.book.sendBookToServer(true);
                 this.mc.displayGuiScreen(null);
                 break;

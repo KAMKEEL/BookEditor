@@ -1,6 +1,6 @@
 package kamkeel.plugeditor.constants;
 
-public class Buttons {
+public class ButtonIds {
     // Navigation & Actions
     public static final int BTN_DONE = 0;
     public static final int BTN_NEXT_PAGE = 1;
