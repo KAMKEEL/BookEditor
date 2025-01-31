@@ -42,3 +42,4 @@ run
 .metadata
 .settings
 classes
+/classes/
