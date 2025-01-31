@@ -403,7 +403,7 @@ public class GuiPlugBook extends GuiScreen {
         int bookTextLeft = bookLeftSide + 36;
         int bookTextTop = 33;
         if (posX >= bookTextLeft && posX < bookTextLeft + 116 && posY >= bookTextTop && posY < bookTextTop + 116) {
-            int rowGuess = (posY - bookTextTop) / 9;
+            int rowGuess = (posY - bookTextTop) / this.fontRendererObj.FONT_HEIGHT;
             Page currPage = this.book.pages.get(this.book.cursorPage);
             if (rowGuess < 0) {
                 rowGuess = 0;
@@ -529,8 +529,8 @@ public class GuiPlugBook extends GuiScreen {
         this.fontRendererObj.drawString(pageIndicator, bookLeftSide - pageIndicatorWidth + this.bookImageWidth - 44, b0 + 16, 0);
         int cursorX1 = bookLeftSide + 35 + this.book.getCursorX();
         int cursorX2 = cursorX1 + 1;
-        int cursorY1 = 33 + 9 * this.book.cursorLine;
-        int cursorY2 = cursorY1 + 9;
+        int cursorY1 = 33 + this.fontRendererObj.FONT_HEIGHT * this.book.cursorLine;
+        int cursorY2 = cursorY1 + this.fontRendererObj.FONT_HEIGHT;
         byte phase = (byte) (this.updateCount / 10 % 2);
         int cursorColor = -16777216;
         if (phase == 1)
