@@ -39,7 +39,3 @@ addon.late.local.gradle.kts
 layout.json
 out
 run
-.metadata
-.settings
-classes
-/classes/

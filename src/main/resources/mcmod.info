@@ -1,14 +1,14 @@
 [
 {
-  "modid": "bookeditor",
-  "name": "BookEditor",
+  "modid": "${modId}",
+  "name": "${modName}",
   "description": "Utility for dealing with books (backup, restore, copy, paste, etc.).",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
+  "version": "${modVersion}",
+  "mcversion": "${minecraftVersion}",
   "url": "",
   "updateUrl": "",
-  "authors": ["waffle_stomper", "Kamkeel"],
-  "credits": "The Forge team for making my life a lot easier",
+  "authors": ["KAMKEEL"],
+  "credits": "waffle_stomper for originating the mod",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
