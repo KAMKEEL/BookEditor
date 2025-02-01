@@ -136,53 +136,102 @@ public class Book {
     }
 
     public void removeChar(boolean nextChar) {
-        Line currLine = pages.get(cursorPage).lines.get(cursorLine);
+        // Retrieve current line
+        Line currLine = this.pages.get(this.cursorPage).lines.get(this.cursorLine);
 
         if (nextChar) {
-            if (cursorPosChars < currLine.text.length()) {
-                if (cursorPosChars + 1 < currLine.text.length() &&
-                        currLine.text.charAt(cursorPosChars) == '\u00a7' &&
-                        (Line.isFormatColor(currLine.text.charAt(cursorPosChars + 1)) ||
-                                Line.isFormatSpecial(currLine.text.charAt(cursorPosChars + 1)))) {
-                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage, cursorLine, cursorPosChars + 2);
-                } else {
-                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage, cursorLine, cursorPosChars + 1);
+            // =============================
+            // "Forward Delete" logic (Working)
+            // =============================
+            if (this.cursorPosChars < currLine.text.length()) {
+                int removeEnd = this.cursorPosChars;
+
+                // Scan forward to delete all consecutive color codes
+                while (removeEnd + 1 < currLine.text.length()
+                    && currLine.text.charAt(removeEnd) == '\u00a7'
+                    && (Line.isFormatColor(currLine.text.charAt(removeEnd + 1))
+                    || Line.isFormatSpecial(currLine.text.charAt(removeEnd + 1)))) {
+                    removeEnd += 2; // Skip "§x"
                 }
-            } else if (cursorLine + 1 < pages.get(cursorPage).lines.size()) {
-                int toLine = cursorLine + 1;
-                if (pages.get(cursorPage).lines.get(toLine).text.length() >= 1)
-                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage, toLine, 1);
-            } else if (cursorPage + 1 < pages.size()) {
-                Page nextPage = pages.get(cursorPage + 1);
-                if (nextPage.asString().isEmpty()) {
-                    pages.remove(cursorPage + 1);
+
+                // Remove only color codes; stop before the next normal character
+                if (removeEnd > this.cursorPosChars) {
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                        this.cursorPage, this.cursorLine, removeEnd);
                 } else {
-                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage + 1, 0, 1);
+                    // Remove one normal character if no color codes were found
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                        this.cursorPage, this.cursorLine, this.cursorPosChars + 1);
                 }
             }
-        } else {
-            if (cursorPosChars > 0) {
-                int deleteStart = cursorPosChars - 1;
-                if (deleteStart > 0 && currLine.text.charAt(deleteStart - 1) == '\u00a7') {
-                    deleteStart--;
+            else if (this.cursorLine + 1 < this.pages.get(this.cursorPage).lines.size()) {
+                int toLine = this.cursorLine + 1;
+                if (this.pages.get(this.cursorPage).lines.get(toLine).text.length() >= 1) {
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                        this.cursorPage, toLine, 1);
                 }
-                while (deleteStart > 0 && currLine.text.charAt(deleteStart - 1) == '\u00a7') {
-                    deleteStart -= 2;
+            }
+            else if (this.cursorPage + 1 < this.pages.size()) {
+                Page nextPage = this.pages.get(this.cursorPage + 1);
+                if (nextPage.asString().isEmpty()) {
+                    this.pages.remove(this.cursorPage + 1);
+                } else {
+                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
+                        this.cursorPage + 1, 0, 1);
                 }
-                if (deleteStart < 0) deleteStart = 0;
-                removeText(cursorPage, cursorLine, deleteStart, cursorPage, cursorLine, cursorPosChars);
-                cursorPosChars = deleteStart;
-            } else if (cursorLine > 0) {
-                currLine = pages.get(cursorPage).lines.get(cursorLine - 1);
-                removeText(cursorPage, cursorLine - 1, currLine.text.length() - 1, cursorPage, cursorLine, cursorPosChars);
-            } else if (cursorPage > 0) {
-                Page currPage = pages.get(cursorPage - 1);
+            }
+        }
+        else {
+            // =============================
+            // "Backspace" logic (FIXED)
+            // =============================
+            if (this.cursorPosChars > 0) {
+                int removeStart = this.cursorPosChars - 1;
+                boolean removedAny = false;
+
+                // Scan backwards to remove ALL color codes
+                while (removeStart > 0) {
+                    if (currLine.text.charAt(removeStart - 1) == '\u00a7') {
+                        char codeChar = currLine.text.charAt(removeStart);
+                        if (Line.isFormatColor(codeChar) || Line.isFormatSpecial(codeChar)) {
+                            removeStart -= 2; // Move past "§x"
+                            removedAny = true;
+                        } else {
+                            break; // Stop if it's not a valid color code
+                        }
+                    } else {
+                        break; // Stop if it's a normal character
+                    }
+                }
+
+                // Ensure we only remove color codes and NOT the normal character
+                if (removedAny) {
+                    removeText(this.cursorPage, this.cursorLine, removeStart,
+                        this.cursorPage, this.cursorLine, this.cursorPosChars);
+                    this.cursorPosChars = removeStart;
+                } else {
+                    removeText(cursorPage, cursorLine, cursorPosChars - 1, cursorPage, cursorLine, cursorPosChars);
+                }
+            }
+            else if (this.cursorLine > 0) {
+                // Backspace at the start of a line: join with previous line
+                currLine = this.pages.get(this.cursorPage).lines.get(this.cursorLine - 1);
+                removeText(this.cursorPage, this.cursorLine - 1, currLine.text.length(),
+                    this.cursorPage, this.cursorLine, this.cursorPosChars);
+            }
+            else if (this.cursorPage > 0) {
+                // Backspace at the start of the first line in the page: join with previous page
+                Page currPage = this.pages.get(this.cursorPage - 1);
                 int lineNum = currPage.lines.size() - 1;
                 currLine = currPage.lines.get(lineNum);
-                removeText(cursorPage - 1, lineNum, currLine.text.length() - 1, cursorPage, cursorLine, cursorPosChars);
+                removeText(this.cursorPage - 1, lineNum, currLine.text.length(),
+                    this.cursorPage, this.cursorLine, this.cursorPosChars);
             }
         }
     }
+
+
+
 
     public void removeText(int fromPage, int fromLine, int fromChar, int toPage, int toLine, int toChar) {
         if (fromPage < 0)
@@ -305,81 +354,172 @@ public class Book {
     }
 
     public void moveCursor(CursorDirection direction) {
-        int cursorPosCharsWithFormat, currLineLength;
+        // Make sure we have a valid page & line
         Page currPage = this.pages.get(this.cursorPage);
         Line currLine = currPage.lines.get(this.cursorLine);
+
+        // We'll often use pixel-based "cursorPosPx" for up/down arrow
         int cursorPosPx = getCursorX();
+
         switch (direction) {
             case UP:
+                // Move cursor up one line
                 if (this.cursorLine == 0) {
+                    // Already on first line of page
                     if (this.cursorPage > 0) {
+                        // Go to previous page if possible
                         this.cursorPage--;
                         currPage = this.pages.get(this.cursorPage);
                         this.cursorLine = currPage.lines.size() - 1;
                     } else {
+                        // Can't move further up; clamp to pos=0
                         this.cursorPosChars = 0;
                         return;
                     }
                 } else {
-                    if (cursorPosPx <= 0)
-                        this.cursorPosChars = 0;
+                    // Just go up one line
                     this.cursorLine--;
                 }
+
+                // Re-fetch the line now that we've changed cursorLine
                 currLine = currPage.lines.get(this.cursorLine);
-                cursorPosCharsWithFormat = Line.sizeStringToApproxWidthBlind(currLine.wrappedFormatting + currLine.text, cursorPosPx);
-                this.cursorPosChars = cursorPosCharsWithFormat - currLine.wrappedFormatting.length();
-                if (this.cursorPosChars > 0 &&
-                        currLine.text.charAt(this.cursorPosChars - 1) == '\n')
-                    this.cursorPosChars--;
+
+                // Approximate the cursor's character position via pixel
+                int cursorPosCharsUp = Line.sizeStringToApproxWidthBlind(
+                    currLine.wrappedFormatting + currLine.text, cursorPosPx
+                );
+                // Subtract out the wrappedFormatting so we land in the raw text
+                this.cursorPosChars = Math.max(cursorPosCharsUp - currLine.wrappedFormatting.length(), 0);
+
+                // If we landed just after a newline, step back 1 char
+                if (this.cursorPosChars > 0 && this.cursorPosChars <= currLine.text.length()) {
+                    if (currLine.text.charAt(this.cursorPosChars - 1) == '\n') {
+                        this.cursorPosChars--;
+                    }
+                }
+
+                // === Skip color codes (if we landed on them) ===
+                while (this.cursorPosChars > 0
+                    && currLine.text.charAt(this.cursorPosChars - 1) == '\u00a7') {
+                    this.cursorPosChars = Math.max(this.cursorPosChars - 2, 0);
+                }
                 return;
+
             case DOWN:
+                // Move cursor down one line
                 if (this.cursorLine == currPage.lines.size() - 1) {
+                    // If on last line of page, maybe go to next page
                     if (this.cursorPage < totalPages() - 1) {
                         this.cursorPage++;
                         this.cursorLine = 0;
                     } else {
+                        // We're at very bottom, clamp to end
                         currLine = currPage.lines.get(currPage.lines.size() - 1);
                         this.cursorPosChars = currLine.text.length();
+                        return;
                     }
                 } else {
-                    if (cursorPosPx <= 0)
-                        this.cursorPosChars = 0;
+                    // Just go down one line
                     this.cursorLine++;
                 }
+
                 currLine = currPage.lines.get(this.cursorLine);
-                currLine = ((Page) this.pages.get(this.cursorPage)).lines.get(this.cursorLine);
-                cursorPosCharsWithFormat = Line.sizeStringToApproxWidthBlind(currLine.wrappedFormatting + currLine.text, cursorPosPx);
-                this.cursorPosChars = cursorPosCharsWithFormat - currLine.wrappedFormatting.length();
-                if (this.cursorPosChars > 0 &&
-                        currLine.text.charAt(this.cursorPosChars - 1) == '\n')
-                    this.cursorPosChars--;
-                break;
-            case LEFT:
-                if (this.cursorPosChars > 0) {
-                    this.cursorPosChars--;
-                    if (this.cursorPosChars > 0 && currLine.text.charAt(this.cursorPosChars - 1) == '\u00a7')
+
+                // Approximate char position by pixel
+                int cursorPosCharsDown = Line.sizeStringToApproxWidthBlind(
+                    currLine.wrappedFormatting + currLine.text, cursorPosPx
+                );
+                this.cursorPosChars = Math.max(
+                    cursorPosCharsDown - currLine.wrappedFormatting.length(), 0
+                );
+
+                // If on or just after a newline, step back 1
+                if (this.cursorPosChars > 0 && this.cursorPosChars <= currLine.text.length()) {
+                    if (currLine.text.charAt(this.cursorPosChars - 1) == '\n') {
                         this.cursorPosChars--;
-                } else if (this.cursorLine > 0) {
-                    this.cursorLine--;
-                    this.cursorPosChars = getCurrLine().length() - 1;
+                    }
+                }
+
+                // === Skip color codes ===
+                while (this.cursorPosChars > 0
+                    && currLine.text.charAt(this.cursorPosChars - 1) == '\u00a7') {
+                    this.cursorPosChars = Math.max(this.cursorPosChars - 2, 0);
                 }
                 return;
-            case RIGHT:
-                currLineLength = currLine.text.length();
-                if (this.cursorPosChars < currLineLength && currLine.text.charAt(this.cursorPosChars) != '\n') {
-                    this.cursorPosChars++;
-                    if (currLine.text.charAt(this.cursorPosChars - 1) == '\u00a7' && this.cursorPosChars < currLineLength - 1) {
-                        char nextChar = currLine.text.charAt(this.cursorPosChars);
-                        if (Line.isFormatSpecial(nextChar) || Line.isFormatColor(nextChar))
-                            this.cursorPosChars++;
+
+            case LEFT:
+                // Move cursor left by 1 displayed char
+                if (this.cursorPosChars > 0) {
+                    this.cursorPosChars--;
+
+                    // === Skip color codes in case we land on them ===
+                    while (this.cursorPosChars > 0
+                        && currLine.text.charAt(this.cursorPosChars - 1) == '\u00a7') {
+                        this.cursorPosChars = Math.max(this.cursorPosChars - 2, 0);
                     }
-                } else if (this.cursorLine < ((Page) this.pages.get(this.cursorPage)).lines.size() - 1) {
-                    this.cursorPosChars = 0;
-                    this.cursorLine++;
+
+                    // Optional: if we end up at pos=0, jump to previous line
+                    // if you want that behavior in one keypress.
+                    // (Remove this if you prefer multiple left-presses)
+                    if (this.cursorPosChars == 0) {
+                        if (this.cursorLine > 0) {
+                            // Move up a line, set pos to end
+                            this.cursorLine--;
+                            currLine = currPage.lines.get(this.cursorLine);
+                            this.cursorPosChars = currLine.text.length();
+
+                            // If that line ends with \n, step back 1
+                            if (this.cursorPosChars > 0
+                                && currLine.text.charAt(this.cursorPosChars - 1) == '\n') {
+                                this.cursorPosChars--;
+                            }
+                        }
+                    }
+                } else {
+                    // Already at 0, try moving up a line
+                    if (this.cursorLine > 0) {
+                        this.cursorLine--;
+                        currLine = currPage.lines.get(this.cursorLine);
+
+                        // Position at the end of that line
+                        this.cursorPosChars = currLine.text.length();
+                        if (this.cursorPosChars > 0
+                            && currLine.text.charAt(this.cursorPosChars - 1) == '\n') {
+                            this.cursorPosChars--;
+                        }
+                    }
+                }
+                return;
+
+            case RIGHT:
+                // Move cursor right by 1 displayed character
+                int currLineLength = currLine.text.length();
+                if (this.cursorPosChars < currLineLength
+                    && currLine.text.charAt(this.cursorPosChars) != '\n') {
+                    this.cursorPosChars++;
+
+                    // === Skip color codes in case there's a chain ===
+                    // We need a loop that keeps going if we still find '§'
+                    // at the new position (minus 1).
+                    while (this.cursorPosChars < currLineLength
+                        && currLine.text.charAt(this.cursorPosChars - 1) == '\u00a7') {
+                        // Skip '§' + next char
+                        this.cursorPosChars += 1;
+                        if (this.cursorPosChars < currLineLength) {
+                            this.cursorPosChars++;
+                        }
+                    }
+                } else {
+                    // If we're at the end or on a newline, try next line
+                    if (this.cursorLine < currPage.lines.size() - 1) {
+                        this.cursorLine++;
+                        this.cursorPosChars = 0;
+                    }
                 }
                 return;
         }
     }
+
 
     public void turnPage(int numPages) {
         Page oldPage = this.pages.get(this.cursorPage);
