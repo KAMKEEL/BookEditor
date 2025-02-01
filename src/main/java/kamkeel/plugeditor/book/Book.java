@@ -21,6 +21,12 @@ import kamkeel.plugeditor.FileHandler;
 import kamkeel.plugeditor.Printer;
 
 public class Book {
+    public static final String[] FORMAT_CODES = new String[]{
+            "\u00a70", "\u00a71", "\u00a72", "\u00a73", "\u00a74", "\u00a75", "\u00a76", "\u00a77",
+            "\u00a78", "\u00a79", "\u00a7a", "\u00a7b", "\u00a7c", "\u00a7d", "\u00a7e", "\u00a7f",
+            "\u00a7k", "\u00a7l", "\u00a7m", "\u00a7n", "\u00a7o", "\u00a7r"
+    };
+
     public List<Page> pages = new ArrayList<Page>();
 
     public String title = "";
@@ -130,41 +136,51 @@ public class Book {
     }
 
     public void removeChar(boolean nextChar) {
-        Line currLine = ((Page) this.pages.get(this.cursorPage)).lines.get(this.cursorLine);
+        Line currLine = pages.get(cursorPage).lines.get(cursorLine);
+
         if (nextChar) {
-            if (this.cursorPosChars < currLine.text.length()) {
-                if (this.cursorPosChars + 1 < currLine.text.length() && currLine.text.charAt(this.cursorPosChars) == '\u00a7' && (Line.isFormatColor(currLine.text.charAt(this.cursorPosChars + 1)) || Line.isFormatSpecial(currLine.text.charAt(this.cursorPosChars + 1)))) {
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage, this.cursorLine, this.cursorPosChars + 2);
+            if (cursorPosChars < currLine.text.length()) {
+                if (cursorPosChars + 1 < currLine.text.length() &&
+                        currLine.text.charAt(cursorPosChars) == '\u00a7' &&
+                        (Line.isFormatColor(currLine.text.charAt(cursorPosChars + 1)) ||
+                                Line.isFormatSpecial(currLine.text.charAt(cursorPosChars + 1)))) {
+                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage, cursorLine, cursorPosChars + 2);
                 } else {
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage, this.cursorLine, this.cursorPosChars + 1);
+                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage, cursorLine, cursorPosChars + 1);
                 }
-            } else if (this.cursorLine + 1 < ((Page) this.pages.get(this.cursorPage)).lines.size()) {
-                int toLine = this.cursorLine + 1;
-                if (((Line) ((Page) this.pages.get(this.cursorPage)).lines.get(toLine)).text.length() >= 1)
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage, toLine, 1);
-            } else if (this.cursorPage + 1 < this.pages.size()) {
-                Page nextPage = this.pages.get(this.cursorPage + 1);
+            } else if (cursorLine + 1 < pages.get(cursorPage).lines.size()) {
+                int toLine = cursorLine + 1;
+                if (pages.get(cursorPage).lines.get(toLine).text.length() >= 1)
+                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage, toLine, 1);
+            } else if (cursorPage + 1 < pages.size()) {
+                Page nextPage = pages.get(cursorPage + 1);
                 if (nextPage.asString().isEmpty()) {
-                    this.pages.remove(this.cursorPage + 1);
+                    pages.remove(cursorPage + 1);
                 } else {
-                    removeText(this.cursorPage, this.cursorLine, this.cursorPosChars, this.cursorPage + 1, 0, 1);
+                    removeText(cursorPage, cursorLine, cursorPosChars, cursorPage + 1, 0, 1);
                 }
             }
-        } else if (this.cursorPosChars > 0) {
-            char charToLeft = currLine.text.charAt(this.cursorPosChars - 1);
-            if (this.cursorPosChars > 1 && (Line.isFormatColor(charToLeft) || Line.isFormatSpecial(charToLeft)) && currLine.text.charAt(this.cursorPosChars - 2) == '\u00a7') {
-                removeText(this.cursorPage, this.cursorLine, this.cursorPosChars - 2, this.cursorPage, this.cursorLine, this.cursorPosChars);
-            } else {
-                removeText(this.cursorPage, this.cursorLine, this.cursorPosChars - 1, this.cursorPage, this.cursorLine, this.cursorPosChars);
+        } else {
+            if (cursorPosChars > 0) {
+                int deleteStart = cursorPosChars - 1;
+                if (deleteStart > 0 && currLine.text.charAt(deleteStart - 1) == '\u00a7') {
+                    deleteStart--;
+                }
+                while (deleteStart > 0 && currLine.text.charAt(deleteStart - 1) == '\u00a7') {
+                    deleteStart -= 2;
+                }
+                if (deleteStart < 0) deleteStart = 0;
+                removeText(cursorPage, cursorLine, deleteStart, cursorPage, cursorLine, cursorPosChars);
+                cursorPosChars = deleteStart;
+            } else if (cursorLine > 0) {
+                currLine = pages.get(cursorPage).lines.get(cursorLine - 1);
+                removeText(cursorPage, cursorLine - 1, currLine.text.length() - 1, cursorPage, cursorLine, cursorPosChars);
+            } else if (cursorPage > 0) {
+                Page currPage = pages.get(cursorPage - 1);
+                int lineNum = currPage.lines.size() - 1;
+                currLine = currPage.lines.get(lineNum);
+                removeText(cursorPage - 1, lineNum, currLine.text.length() - 1, cursorPage, cursorLine, cursorPosChars);
             }
-        } else if (this.cursorLine > 0) {
-            currLine = ((Page) this.pages.get(this.cursorPage)).lines.get(this.cursorLine - 1);
-            removeText(this.cursorPage, this.cursorLine - 1, currLine.text.length() - 1, this.cursorPage, this.cursorLine, this.cursorPosChars);
-        } else if (this.cursorPage > 0) {
-            Page currPage = this.pages.get(this.cursorPage - 1);
-            int lineNum = currPage.lines.size() - 1;
-            currLine = currPage.lines.get(lineNum);
-            removeText(this.cursorPage - 1, lineNum, currLine.text.length() - 1, this.cursorPage, this.cursorLine, this.cursorPosChars);
         }
     }
 

@@ -17,6 +17,7 @@ public class Buttons {
     public static final int BTN_PASTE_MULTIPLE_PAGES = 18;
     public static final int BTN_INSERT_PAGE = 19;
     public static final int BTN_ADD_SIGNATURE_PAGES = 21;
+    public static final int BTN_COPY_ALL_TEXT = 22;
 
     // Formatting Buttons (50-71)
     public static final int BTN_BLACK = 50;
