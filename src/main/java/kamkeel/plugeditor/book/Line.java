@@ -1,5 +1,11 @@
 package kamkeel.plugeditor.book;
 
+/**
+ * Represents a single line of text inside a book page. Handles text wrapping
+ * and formatting logic so that the rendered output matches Minecraft's book
+ * GUI.
+ */
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +41,12 @@ public class Line {
         if (getStringWidth(str) <= lenPixels)
             return str.length();
         String outStr = str.substring(0, sizeStringToWidthBlind(str, lenPixels));
-        float partialCharWidth = (lenPixels - getStringWidth(outStr));
+        // If the entire string fits, avoid accessing beyond the last index
+        if (outStr.length() == str.length()) {
+            return outStr.length();
+        }
+
+        float partialCharWidth = lenPixels - getStringWidth(outStr);
         if ((partialCharWidth / f.getCharWidth(str.charAt(outStr.length()))) > 0.5D)
             return outStr.length() + 1;
         return outStr.length();
@@ -155,10 +166,10 @@ public class Line {
                 if (formatChar == 'r' || formatChar == 'R') {
                     activeFormatCode = "";
                     activeColorCode = "";
-                } else if ((formatChar >= '\036' && formatChar <= '\'') || (formatChar >= 'A' && formatChar <= 'F') || (formatChar >= 'a' && formatChar <= 'f')) {
+                } else if (isFormatColor(formatChar)) {
                     activeFormatCode = "";
                     activeColorCode = "\u00a7" + formatChar;
-                } else if ((formatChar >= 'K' && formatChar <= 'O') || (formatChar >= 'k' && formatChar <= 'o')) {
+                } else if (isFormatSpecial(formatChar)) {
                     activeFormatCode = "\u00a7" + formatChar;
                 }
             }
@@ -167,7 +178,11 @@ public class Line {
     }
 
     public static int getStringWidth(String strIn) {
-        String unfucked = strIn.replaceAll("\u00a7[A-Fa-f0-9]", "\u00a7r$0");
-        return (Minecraft.getMinecraft()).fontRenderer.getStringWidth(unfucked);
+        // Minecraft's font renderer expects formatting codes to be prefixed
+        // with a reset code otherwise width calculations can be off.  Clean up
+        // the input string so the width is accurate when formatting codes are
+        // present.
+        String sanitized = strIn.replaceAll("\u00a7[A-Fa-f0-9]", "\u00a7r$0");
+        return (Minecraft.getMinecraft()).fontRenderer.getStringWidth(sanitized);
     }
 }

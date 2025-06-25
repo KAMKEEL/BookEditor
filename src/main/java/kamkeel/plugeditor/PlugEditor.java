@@ -1,5 +1,11 @@
 package kamkeel.plugeditor;
 
+/**
+ * Entry point Forge mod that installs the plug editor functionality. This class
+ * listens to game ticks to swap out the regular book GUI with the editable
+ * version and manages clipboard state for copying and pasting pages.
+ */
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;

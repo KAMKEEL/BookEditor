@@ -1,5 +1,10 @@
 package kamkeel.plugeditor.gui;
 
+/**
+ * GUI shown when the user is finalising a book. Allows entering the title and
+ * author before the book is locked via signing.
+ */
+
 import kamkeel.plugeditor.book.Book;
 import kamkeel.plugeditor.constants.Buttons;
 import net.minecraft.client.gui.GuiButton;

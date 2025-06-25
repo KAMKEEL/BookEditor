@@ -1,5 +1,11 @@
 package kamkeel.plugeditor.book;
 
+/**
+ * Represents a single page in a Book. A Page is composed of multiple Lines and
+ * provides helpers for adding text, checking emptiness and formatting padding
+ * so that page data fits within Minecraft's constraints.
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 

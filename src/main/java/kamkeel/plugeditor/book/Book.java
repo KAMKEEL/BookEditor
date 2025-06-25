@@ -1,5 +1,11 @@
 package kamkeel.plugeditor.book;
 
+/**
+ * Core data model representing a writable Minecraft book. The Book manages
+ * pages, lines, cursor position and serialization to and from Minecraft's NBT
+ * format. All editing operations funnel through this class.
+ */
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -539,7 +545,8 @@ public class Book {
         if (this.pages.isEmpty())
             return 0;
         Line currLine = ((Page) this.pages.get(this.cursorPage)).lines.get(this.cursorLine);
-        return Line.getStringWidth(currLine.getTextWithWrappedFormatting().substring(0, this.cursorPosChars + currLine.wrappedFormatting.length()));
+        int visibleChars = Math.min(this.cursorPosChars, currLine.text.length());
+        return Line.getStringWidth(currLine.getTextWithWrappedFormatting().substring(0, visibleChars + currLine.wrappedFormatting.length()));
     }
 
     public String getCurrLine() {
@@ -664,9 +671,11 @@ public class Book {
             endPos = -1;
             direction = -1;
         }
-        int i = startPos;
-        char c = strIn.charAt(i);
-        for (; i != endPos && f.getStringWidth(c + strOut) + subCharsWidth <= maxWidth; i += direction) {
+        for (int i = startPos; i != endPos; i += direction) {
+            char c = strIn.charAt(i);
+            if (f.getStringWidth(c + strOut) + subCharsWidth > maxWidth) {
+                break;
+            }
             if (keepRightSide) {
                 strOut = c + strOut;
             } else {

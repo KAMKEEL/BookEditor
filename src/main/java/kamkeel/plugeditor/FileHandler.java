@@ -1,5 +1,10 @@
 package kamkeel.plugeditor;
 
+/**
+ * Handles reading and writing books to disk in both the custom GHB format and
+ * basic text files. Also manages file browsing logic used by the GUI.
+ */
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -71,6 +76,8 @@ public class FileHandler {
             this.lastCheckedPath = path.getAbsolutePath();
             this.lastListing.clear();
             File[] newList = path.listFiles();
+            if (newList == null)
+                newList = new File[0];
             List<File> files = new ArrayList<File>();
             for (File f : newList) {
                 if (f.isDirectory()) {
@@ -163,7 +170,7 @@ public class FileHandler {
             failedFlag = true;
         if (!failedFlag)
             try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(filePath, true)));
+                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
                 for (String s : toWrite)
                     out.println(s);
                 out.close();
