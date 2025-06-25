@@ -1,5 +1,11 @@
 package kamkeel.plugeditor;
 
+/**
+ * Utility for printing coloured chat messages to the player's chat window.
+ * Provides constants that mirror the vanilla EnumChatFormatting values for
+ * convenience.
+ */
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;

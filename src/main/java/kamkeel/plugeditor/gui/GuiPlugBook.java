@@ -1,5 +1,11 @@
 package kamkeel.plugeditor.gui;
 
+/**
+ * Main book editing GUI that replaces Minecraft's default book screen. Allows
+ * inserting text, formatting via buttons and managing pages with clipboard
+ * operations.
+ */
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,6 +178,9 @@ public class GuiPlugBook extends GuiScreen {
 
         this.buttonList.add(new GuiButton(Buttons.BTN_SAVE_BOOK, 5, 5, buttonWidth, buttonHeight, "Save Book"));
         this.buttonList.add(new GuiButton(Buttons.BTN_COPY_BOOK, rightXPos, 5, buttonWidth, buttonHeight, "Copy Book"));
+
+        // Allow page selection for copying even when the book is signed so
+        // players can duplicate text without editing privileges.
         this.buttonList.add(this.btnSelectPageA = new GuiButton(Buttons.BTN_SELECT_PAGE_A, rightXPos, 50, buttonWidth / 2, buttonHeight, "A"));
         this.buttonList.add(this.btnSelectPageB = new GuiButton(Buttons.BTN_SELECT_PAGE_B, rightXPos + buttonWidth / 2, 50, buttonWidth / 2, buttonHeight, "B"));
         this.buttonList.add(this.btnCopySelectedPages = new GuiButton(Buttons.BTN_COPY_SELECTED_PAGES, rightXPos, 70, buttonWidth, buttonHeight, "Copy This Page"));
@@ -291,7 +300,7 @@ public class GuiPlugBook extends GuiScreen {
         int bookLeftSide = (this.width - this.bookImageWidth) / 2;
         int bookTextLeft = bookLeftSide + 36;
         int bookTextTop = 33;
-        if (posX >= bookTextLeft && posX < bookTextLeft + 116 && posY >= bookTextTop && posY < bookTextTop + 116) {
+        if (this.heldBookIsWritable && posX >= bookTextLeft && posX < bookTextLeft + 116 && posY >= bookTextTop && posY < bookTextTop + 116) {
             int rowGuess = (posY - bookTextTop) / 9;
             Page currPage = this.book.pages.get(this.book.cursorPage);
             if (rowGuess < 0) {
@@ -325,16 +334,20 @@ public class GuiPlugBook extends GuiScreen {
         }
         switch (keycode) {
             case 203:
-                this.book.moveCursor(Book.CursorDirection.LEFT);
+                if (this.heldBookIsWritable)
+                    this.book.moveCursor(Book.CursorDirection.LEFT);
                 return;
             case 205:
-                this.book.moveCursor(Book.CursorDirection.RIGHT);
+                if (this.heldBookIsWritable)
+                    this.book.moveCursor(Book.CursorDirection.RIGHT);
                 return;
             case 200:
-                this.book.moveCursor(Book.CursorDirection.UP);
+                if (this.heldBookIsWritable)
+                    this.book.moveCursor(Book.CursorDirection.UP);
                 return;
             case 208:
-                this.book.moveCursor(Book.CursorDirection.DOWN);
+                if (this.heldBookIsWritable)
+                    this.book.moveCursor(Book.CursorDirection.DOWN);
                 return;
             case 14:
                 if(this.heldBookIsWritable){
@@ -371,40 +384,49 @@ public class GuiPlugBook extends GuiScreen {
         if (this.heldBookIsWritable) {
             this.btnPasteBook.enabled = !this.bookClipboard.pages.isEmpty();
             this.btnPasteMultiplePages.enabled = !this.pageClipboard.isEmpty();
-        }
-        if (this.heldBookIsWritable)
+
             if (this.btnPasteMultiplePages.enabled) {
                 this.btnPasteMultiplePages.displayString = "Paste " + this.pageClipboard.size() + " Page" + ((this.pageClipboard.size() == 1) ? "" : "s");
             } else {
                 this.btnPasteMultiplePages.displayString = "Paste Multiple";
             }
-        if (this.selectedPageA >= this.book.totalPages() || this.selectedPageB >= this.book.totalPages()) {
-            this.selectedPageA = -1;
-            this.selectedPageB = -1;
         }
-        if (this.selectedPageA != -1 && this.selectedPageB != -1 && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB && this.selectedPageB < this.book.totalPages()) {
-            String xPages = (this.selectedPageB - this.selectedPageA + 1) + " Page" + ((this.selectedPageA != this.selectedPageB) ? "s" : "");
-            this.btnCopySelectedPages.displayString = "Copy " + xPages;
-            if (this.heldBookIsWritable)
-                this.btnCutMultiplePages.displayString = "Cut " + xPages;
-            this.btnSelectPageA.displayString = "A: " + (this.selectedPageA + 1);
-            this.btnSelectPageB.displayString = "B: " + (this.selectedPageB + 1);
-        } else if (this.selectedPageA != -1) {
-            this.btnSelectPageA.displayString = "A: " + (this.selectedPageA + 1);
-            this.btnCopySelectedPages.displayString = "Copy This Page";
-            if (this.heldBookIsWritable)
-                this.btnCutMultiplePages.displayString = "Cut This Page";
-        } else if (this.selectedPageB != -1) {
-            this.btnSelectPageB.displayString = "B: " + (this.selectedPageB + 1);
-            this.btnCopySelectedPages.displayString = "Copy This Page";
-            if (this.heldBookIsWritable)
-                this.btnCutMultiplePages.displayString = "Cut This Page";
-        } else {
-            this.btnCopySelectedPages.displayString = "Copy This Page";
-            if (this.heldBookIsWritable)
-                this.btnCutMultiplePages.displayString = "Cut This Page";
-            this.btnSelectPageA.displayString = "A";
-            this.btnSelectPageB.displayString = "B";
+
+        // Update the copy selection controls when they are available
+        if (this.btnCopySelectedPages != null) {
+            if (this.selectedPageA >= this.book.totalPages() || this.selectedPageB >= this.book.totalPages()) {
+                this.selectedPageA = -1;
+                this.selectedPageB = -1;
+            }
+
+            if (this.selectedPageA != -1 && this.selectedPageB != -1 && this.selectedPageA >= 0 && this.selectedPageA <= this.selectedPageB && this.selectedPageB < this.book.totalPages()) {
+                String xPages = (this.selectedPageB - this.selectedPageA + 1) + " Page" + ((this.selectedPageA != this.selectedPageB) ? "s" : "");
+                this.btnCopySelectedPages.displayString = "Copy " + xPages;
+                if (this.btnCutMultiplePages != null) {
+                    this.btnCutMultiplePages.displayString = "Cut " + xPages;
+                }
+                this.btnSelectPageA.displayString = "A: " + (this.selectedPageA + 1);
+                this.btnSelectPageB.displayString = "B: " + (this.selectedPageB + 1);
+            } else if (this.selectedPageA != -1) {
+                this.btnSelectPageA.displayString = "A: " + (this.selectedPageA + 1);
+                this.btnCopySelectedPages.displayString = "Copy This Page";
+                if (this.btnCutMultiplePages != null) {
+                    this.btnCutMultiplePages.displayString = "Cut This Page";
+                }
+            } else if (this.selectedPageB != -1) {
+                this.btnSelectPageB.displayString = "B: " + (this.selectedPageB + 1);
+                this.btnCopySelectedPages.displayString = "Copy This Page";
+                if (this.btnCutMultiplePages != null) {
+                    this.btnCutMultiplePages.displayString = "Cut This Page";
+                }
+            } else {
+                this.btnCopySelectedPages.displayString = "Copy This Page";
+                if (this.btnCutMultiplePages != null) {
+                    this.btnCutMultiplePages.displayString = "Cut This Page";
+                }
+                this.btnSelectPageA.displayString = "A";
+                this.btnSelectPageB.displayString = "B";
+            }
         }
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(bookGuiTextures);
@@ -416,15 +438,17 @@ public class GuiPlugBook extends GuiScreen {
         String pageIndicator = String.format("Page %d of %d", new Object[]{Integer.valueOf(this.book.cursorPage + 1), Integer.valueOf(this.book.totalPages())});
         int pageIndicatorWidth = this.fontRendererObj.getStringWidth(pageIndicator);
         this.fontRendererObj.drawString(pageIndicator, bookLeftSide - pageIndicatorWidth + this.bookImageWidth - 44, b0 + 16, 0);
-        int cursorX1 = bookLeftSide + 35 + this.book.getCursorX();
-        int cursorX2 = cursorX1 + 1;
-        int cursorY1 = 33 + 9 * this.book.cursorLine;
-        int cursorY2 = cursorY1 + 9;
-        byte phase = (byte) (this.updateCount / 10 % 2);
-        int cursorColor = -16777216;
-        if (phase == 1)
-            cursorColor = -6645094;
-        drawRect(cursorX1, cursorY1, cursorX2, cursorY2, cursorColor);
+        if (this.heldBookIsWritable) {
+            int cursorX1 = bookLeftSide + 35 + this.book.getCursorX();
+            int cursorX2 = cursorX1 + 1;
+            int cursorY1 = 33 + 9 * this.book.cursorLine;
+            int cursorY2 = cursorY1 + 9;
+            byte phase = (byte) (this.updateCount / 10 % 2);
+            int cursorColor = -16777216;
+            if (phase == 1)
+                cursorColor = -6645094;
+            drawRect(cursorX1, cursorY1, cursorX2, cursorY2, cursorColor);
+        }
         super.drawScreen(par1, par2, par3);
     }
 

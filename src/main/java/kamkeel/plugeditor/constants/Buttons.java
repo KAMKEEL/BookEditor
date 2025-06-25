@@ -1,5 +1,11 @@
 package kamkeel.plugeditor.constants;
 
+/**
+ * Numeric IDs used by the various GUI classes for button widgets. Keeping them
+ * centralised makes it easier to manage and avoid collisions between different
+ * screens.
+ */
+
 public class Buttons {
     // Navigation & Actions
     public static final int BTN_DONE = 0;

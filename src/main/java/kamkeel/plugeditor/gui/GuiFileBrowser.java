@@ -1,5 +1,10 @@
 package kamkeel.plugeditor.gui;
 
+/**
+ * Simple file browser used for selecting books to load or preview. It displays
+ * a scrollable list of files and directories from the configured book folder.
+ */
+
 import java.io.File;
 import java.util.List;
 
@@ -133,7 +138,9 @@ public class GuiFileBrowser extends GuiScreen {
 
         protected int getPaddedSize() {
             int scrollHeight = GuiFileBrowser.this.height - 96;
-            int minSlots = (int) Math.ceil((scrollHeight / 12));
+            // Use floating point division to avoid truncation when calculating
+            // how many slots should be visible.
+            int minSlots = (int) Math.ceil(scrollHeight / 12.0);
             if (GuiFileBrowser.this.listItems.size() >= minSlots)
                 return GuiFileBrowser.this.listItems.size();
             return minSlots;
