@@ -169,15 +169,17 @@ public class Book {
                     removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
                         this.cursorPage, this.cursorLine, this.cursorPosChars + 1);
                 }
-            }
-            else if (this.cursorLine + 1 < this.pages.get(this.cursorPage).lines.size()) {
+            } else if (currLine.text.endsWith("\n")) {
+                // At the end of a line that ends with a newline. Delete the break.
+                removeText(this.cursorPage, this.cursorLine, currLine.text.length() - 1,
+                    this.cursorPage, this.cursorLine + 1, 0);
+            } else if (this.cursorLine + 1 < this.pages.get(this.cursorPage).lines.size()) {
                 int toLine = this.cursorLine + 1;
                 if (this.pages.get(this.cursorPage).lines.get(toLine).text.length() >= 1) {
                     removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
                         this.cursorPage, toLine, 1);
                 }
-            }
-            else if (this.cursorPage + 1 < this.pages.size()) {
+            } else if (this.cursorPage + 1 < this.pages.size()) {
                 Page nextPage = this.pages.get(this.cursorPage + 1);
                 if (nextPage.asString().isEmpty()) {
                     this.pages.remove(this.cursorPage + 1);
@@ -220,9 +222,16 @@ public class Book {
                 }
             }
             else if (this.cursorLine > 0) {
-                // Backspace at the start of a line: join with previous line
+                // Backspace at the start of a line. Remove the character just
+                // before the cursor which may be a newline inserted when the
+                // user pressed Enter or simply the last character of the
+                // previous line when wrapping occurred.
                 currLine = this.pages.get(this.cursorPage).lines.get(this.cursorLine - 1);
-                removeText(this.cursorPage, this.cursorLine - 1, currLine.text.length(),
+                int removeIndex = currLine.text.length();
+                if (removeIndex > 0)
+                    removeIndex--; // Drop the preceding character/newline
+
+                removeText(this.cursorPage, this.cursorLine - 1, removeIndex,
                     this.cursorPage, this.cursorLine, this.cursorPosChars);
             }
             else if (this.cursorPage > 0) {
