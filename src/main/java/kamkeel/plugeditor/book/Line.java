@@ -9,6 +9,7 @@ package kamkeel.plugeditor.book;
 import java.util.Arrays;
 import java.util.List;
 
+import kamkeel.plugeditor.util.FontRendererPrivate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 
@@ -93,45 +94,9 @@ public class Line {
         return ((par0 >= '0' && par0 <= '9') || (par0 >= 'a' && par0 <= 'f') || (par0 >= 'A' && par0 <= 'F'));
     }
 
-    public static int sizeStringToWidth(String par1Str, int par2) {
-        int j = par1Str.length();
-        int k = 0;
-        int l = 0;
-        int i1 = -1;
-        for (boolean flag = false; l < j; l++) {
-            char c0 = par1Str.charAt(l);
-            switch (c0) {
-                case '\n':
-                    l--;
-                    break;
-                case '\u00a7':
-                    if (l < j - 1) {
-                        l++;
-                        char c1 = par1Str.charAt(l);
-                        if (c1 != 'l' && c1 != 'L') {
-                            if (c1 == 'r' || c1 == 'R' || isFormatColor(c1))
-                                flag = false;
-                            break;
-                        }
-                        flag = true;
-                    }
-                    break;
-                case ' ':
-                    i1 = l;
-                default:
-                    k += (Minecraft.getMinecraft()).fontRenderer.getCharWidth(c0);
-                    if (flag)
-                        k++;
-                    break;
-            }
-            if (c0 == '\n') {
-                i1 = ++l;
-                break;
-            }
-            if (k > par2)
-                break;
-        }
-        return (l != j && i1 != -1 && i1 < l) ? i1 : l;
+    public static int sizeStringToWidth(String s, int maxPx) {
+        FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
+        return FontRendererPrivate.callSizeStringToWidth(fr, s, maxPx);
     }
 
     private static String wrapStringToWidth(String strIn, int maxWidth, String wrappedFormatting) {
