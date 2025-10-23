@@ -52,16 +52,15 @@ public class Line {
         return outStr.length();
     }
 
-    public static int sizeStringToWidthBlind(String str, int maxLenPixels) {
-        if (getStringWidth(str) <= maxLenPixels)
-            return str.length();
-        String outStr = "";
-        for (int i = 0; i < str.length(); i++) {
-            if (getStringWidth(outStr + str.charAt(i)) > maxLenPixels)
-                return outStr.length();
-            outStr = outStr + str.charAt(i);
+    public static int sizeStringToWidthBlind(String s, int maxPx) {
+        FontRenderer f = Minecraft.getMinecraft().fontRenderer;
+        if (f.getStringWidth(s) <= maxPx) return s.length();
+        int lo=0, hi=s.length();
+        while (lo < hi) {
+            int mid = (lo+hi+1)/2;
+            if (f.getStringWidth(s.substring(0, mid)) <= maxPx) lo = mid; else hi = mid-1;
         }
-        return outStr.length();
+        return lo;
     }
 
     public String getTextWithWrappedFormatting() {
@@ -157,32 +156,32 @@ public class Line {
         return getActiveFormatting(this.wrappedFormatting + this.text);
     }
 
-    private static String getActiveFormatting(String strIn) {
-        String activeFormatCode = "";
-        String activeColorCode = "";
-        for (int i = 0; i < strIn.length() - 1; i++) {
-            if (strIn.charAt(i) == '\u00a7') {
-                char formatChar = strIn.charAt(i + 1);
-                if (formatChar == 'r' || formatChar == 'R') {
-                    activeFormatCode = "";
-                    activeColorCode = "";
-                } else if (isFormatColor(formatChar)) {
-                    activeFormatCode = "";
-                    activeColorCode = "\u00a7" + formatChar;
-                } else if (isFormatSpecial(formatChar)) {
-                    activeFormatCode = "\u00a7" + formatChar;
-                }
-            }
+    private static String getActiveFormatting(String s) {
+        String color = "";
+        boolean k=false, l=false, m=false, n=false, o=false;
+
+        for (int i=0; i < s.length()-1; i++) if (s.charAt(i) == '§') {
+            char c = Character.toLowerCase(s.charAt(i+1));
+            if (c == 'r') { color=""; k=l=m=n=o=false; }
+            else if ((c>='0'&&c<='9') || (c>='a'&&c<='f')) { color = "§" + c; k=l=m=n=o=false; }
+            else if (c=='k') k=true;
+            else if (c=='l') l=true;
+            else if (c=='m') m=true;
+            else if (c=='n') n=true;
+            else if (c=='o') o=true;
         }
-        return activeColorCode + activeFormatCode;
+        StringBuilder out = new StringBuilder();
+        if (!color.isEmpty()) out.append(color);
+        if (k) out.append("§k");
+        if (l) out.append("§l");
+        if (m) out.append("§m");
+        if (n) out.append("§n");
+        if (o) out.append("§o");
+        return out.toString();
     }
 
     public static int getStringWidth(String strIn) {
-        // Minecraft's font renderer expects formatting codes to be prefixed
-        // with a reset code otherwise width calculations can be off.  Clean up
-        // the input string so the width is accurate when formatting codes are
-        // present.
-        String sanitized = strIn.replaceAll("\u00a7[A-Fa-f0-9]", "\u00a7r$0");
-        return (Minecraft.getMinecraft()).fontRenderer.getStringWidth(sanitized);
+        FontRenderer f = Minecraft.getMinecraft().fontRenderer;
+        return f.getStringWidth(strIn);
     }
 }
