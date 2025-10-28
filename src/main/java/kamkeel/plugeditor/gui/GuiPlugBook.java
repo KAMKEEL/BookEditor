@@ -28,6 +28,7 @@ import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import kamkeel.plugeditor.constants.Buttons;
+import kamkeel.plugeditor.util.AngelicaUtil;
 
 public class GuiPlugBook extends GuiScreen {
     private Minecraft mc = Minecraft.getMinecraft();
@@ -82,12 +83,18 @@ public class GuiPlugBook extends GuiScreen {
     public GuiPlugBook(Book _bookClipboard, List<String> _pageClipboard) {
         this.bookClipboard = _bookClipboard;
         this.pageClipboard = _pageClipboard;
-        this.mcBookObj = this.mc.thePlayer.getHeldItem();
-        if (this.mcBookObj.getItem().equals(Items.writable_book))
+        this.mcBookObj = AngelicaUtil.safeGetHeldItem(this.mc);
+        if (AngelicaUtil.isWritableBook(this.mcBookObj)) {
             this.heldBookIsWritable = true;
+        } else if (this.mcBookObj == null) {
+            this.mcBookObj = new ItemStack(Items.writable_book);
+            this.heldBookIsWritable = false;
+        } else {
+            this.heldBookIsWritable = false;
+        }
         this.book = new Book();
         this.book.pages.add(new Page());
-        if (this.mcBookObj.hasTagCompound()) {
+        if (this.mcBookObj != null && this.mcBookObj.hasTagCompound()) {
             NBTTagCompound nbttagcompound = this.mcBookObj.getTagCompound();
             NBTTagList bookPages = nbttagcompound.getTagList("pages", 8);
             if (bookPages != null) {
