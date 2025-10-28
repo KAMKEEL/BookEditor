@@ -25,6 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import kamkeel.plugeditor.FileHandler;
 import kamkeel.plugeditor.Printer;
+import kamkeel.plugeditor.util.AngelicaUtil;
 
 public class Book {
     public static final String[] FORMAT_CODES = new String[]{
@@ -151,17 +152,20 @@ public class Book {
             // =============================
             if (this.cursorPosChars < currLine.text.length()) {
                 int removeEnd = this.cursorPosChars;
+                boolean removedFormatting = false;
 
-                // Scan forward to delete all consecutive color codes
-                while (removeEnd + 1 < currLine.text.length()
-                    && currLine.text.charAt(removeEnd) == '\u00a7'
-                    && (Line.isFormatColor(currLine.text.charAt(removeEnd + 1))
-                    || Line.isFormatSpecial(currLine.text.charAt(removeEnd + 1)))) {
-                    removeEnd += 2; // Skip "§x"
+                // Scan forward to delete any Angelica formatting codes.
+                while (removeEnd < currLine.text.length()) {
+                    int codeLength = AngelicaUtil.detectAngelicaColorCodeLength(currLine.text, removeEnd);
+                    if (codeLength > 0) {
+                        removeEnd += codeLength;
+                        removedFormatting = true;
+                    } else {
+                        break;
+                    }
                 }
 
-                // Remove only color codes; stop before the next normal character
-                if (removeEnd > this.cursorPosChars) {
+                if (removedFormatting) {
                     removeText(this.cursorPage, this.cursorLine, this.cursorPosChars,
                         this.cursorPage, this.cursorLine, removeEnd);
                 } else {
@@ -194,29 +198,23 @@ public class Book {
             // "Backspace" logic (FIXED)
             // =============================
             if (this.cursorPosChars > 0) {
-                int removeStart = this.cursorPosChars - 1;
+                int removeStart = this.cursorPosChars;
                 boolean removedAny = false;
 
-                // Scan backwards to remove ALL color codes
                 while (removeStart > 0) {
-                    if (currLine.text.charAt(removeStart - 1) == '\u00a7') {
-                        char codeChar = currLine.text.charAt(removeStart);
-                        if (Line.isFormatColor(codeChar) || Line.isFormatSpecial(codeChar)) {
-                            removeStart -= 2; // Move past "§x"
-                            removedAny = true;
-                        } else {
-                            break; // Stop if it's not a valid color code
-                        }
+                    int codeStart = AngelicaUtil.findAngelicaColorCodeStart(currLine.text, removeStart);
+                    if (codeStart >= 0) {
+                        removedAny = true;
+                        removeStart = codeStart;
                     } else {
-                        break; // Stop if it's a normal character
+                        break;
                     }
                 }
 
-                // Ensure we only remove color codes and NOT the normal character
                 if (removedAny) {
                     removeText(this.cursorPage, this.cursorLine, removeStart,
                         this.cursorPage, this.cursorLine, this.cursorPosChars);
-                    this.cursorPosChars = removeStart;
+                    this.cursorPosChars = Math.max(0, removeStart);
                 } else {
                     removeText(cursorPage, cursorLine, cursorPosChars - 1, cursorPage, cursorLine, cursorPosChars);
                 }
@@ -598,9 +596,15 @@ public class Book {
 
     public void sendBookToServer(boolean signIt) {
         System.out.println("Sending book to server!");
-        ItemStack bookObj = (Minecraft.getMinecraft()).thePlayer.getHeldItem();
-        if (bookObj.getItem().equals(Items.writable_book) &&
-                totalPages() > 0) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        ItemStack bookObj = AngelicaUtil.safeGetHeldItem(minecraft);
+
+        if (!AngelicaUtil.isWritableBook(bookObj)) {
+            Printer.gamePrint(Printer.RED + "You must hold a writable book to save.");
+            return;
+        }
+
+        if (totalPages() > 0) {
             for (int i = totalPages() - 1; i >= 0 && (
                     (Page) this.pages.get(i)).asString().isEmpty(); i--) {
                 if (i == 0) {
@@ -624,7 +628,8 @@ public class Book {
                     fh.saveBookToGHBFile(this);
                     break;
                 }
-                bookPages.appendTag((NBTBase) new NBTTagString(page.asString()));
+                String pageText = AngelicaUtil.sanitizeAngelicaFormatting(page.asString());
+                bookPages.appendTag((NBTBase) new NBTTagString(pageText));
             }
             if (bookObj.hasTagCompound()) {
                 NBTTagCompound nbttagcompound = bookObj.getTagCompound();
