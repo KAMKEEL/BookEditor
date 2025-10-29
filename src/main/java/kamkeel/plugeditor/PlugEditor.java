@@ -8,6 +8,7 @@ package kamkeel.plugeditor;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kamkeel.plugeditor.book.Book;
+import kamkeel.plugeditor.book.BookController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
@@ -47,6 +49,11 @@ public class PlugEditor {
         MinecraftForge.EVENT_BUS.register(this);
         this.bookClipboard = new Book();
         this.pageClipboard = new ArrayList<String>();
+    }
+
+    @Mod.EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        BookController.getInstance().preInit();
     }
 
     @SubscribeEvent

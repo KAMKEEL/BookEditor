@@ -28,7 +28,7 @@ import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import kamkeel.plugeditor.constants.Buttons;
-import kamkeel.plugeditor.util.AngelicaUtil;
+import kamkeel.plugeditor.util.MinecraftBookUtil;
 
 public class GuiPlugBook extends GuiScreen {
     private Minecraft mc = Minecraft.getMinecraft();
@@ -83,8 +83,8 @@ public class GuiPlugBook extends GuiScreen {
     public GuiPlugBook(Book _bookClipboard, List<String> _pageClipboard) {
         this.bookClipboard = _bookClipboard;
         this.pageClipboard = _pageClipboard;
-        this.mcBookObj = AngelicaUtil.safeGetHeldItem(this.mc);
-        if (AngelicaUtil.isWritableBook(this.mcBookObj)) {
+        this.mcBookObj = MinecraftBookUtil.safeGetHeldItem(this.mc);
+        if (MinecraftBookUtil.isWritableBook(this.mcBookObj)) {
             this.heldBookIsWritable = true;
         } else if (this.mcBookObj == null) {
             this.mcBookObj = new ItemStack(Items.writable_book);
