@@ -1,11 +1,17 @@
 package kamkeel.bookeditor.book;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PageTextUtilTest {
+
+    @Before
+    public void resetFormatter() {
+        BookController.overrideFormatterForTesting(BookController.getStandaloneFormatter());
+    }
 
     @Test
     public void padAddsTrailingLines() {
