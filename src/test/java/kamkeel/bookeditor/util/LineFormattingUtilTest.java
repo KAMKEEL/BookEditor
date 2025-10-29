@@ -1,6 +1,8 @@
 package kamkeel.bookeditor.util;
 
 import kamkeel.bookeditor.book.Line;
+import kamkeel.bookeditor.controller.BookController;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +16,7 @@ public class LineFormattingUtilTest {
     @Before
     public void setUpMetrics() {
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+        BookController.setFormatterForTesting(new StandaloneBookFormatter());
     }
 
     @Test
