@@ -10,15 +10,14 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.gui.GuiBookEditor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
-import kamkeel.bookeditor.gui.GuiBookEditor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static kamkeel.bookeditor.BookEditor.*;
 
@@ -55,7 +54,7 @@ public class BookEditor {
             if (this.mc.currentScreen instanceof net.minecraft.client.gui.GuiScreenBook)
                 this.mc.displayGuiScreen((GuiScreen) new GuiBookEditor(this.bookClipboard, this.pageClipboard));
             if (!this.firstGuiOpen &&
-                    this.firstGuiOpenWait-- <= 0)
+                this.firstGuiOpenWait-- <= 0)
                 this.firstGuiOpen = true;
         }
     }
@@ -64,7 +63,7 @@ public class BookEditor {
     public void renderTick(TickEvent.RenderTickEvent event) {
         if (event.phase == TickEvent.Phase.END)
             if (!this.connected &&
-                    this.connectWait-- <= 0)
+                this.connectWait-- <= 0)
                 this.connected = true;
     }
 }

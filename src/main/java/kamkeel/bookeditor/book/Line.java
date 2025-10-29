@@ -6,12 +6,12 @@ package kamkeel.bookeditor.book;
  * GUI.
  */
 
-import java.util.Arrays;
-import java.util.List;
-
 import kamkeel.bookeditor.util.FontRendererPrivate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class Line {
     public static final int BOOK_TEXT_WIDTH = 116;
@@ -56,10 +56,11 @@ public class Line {
     public static int sizeStringToWidthBlind(String s, int maxPx) {
         FontRenderer f = Minecraft.getMinecraft().fontRenderer;
         if (f.getStringWidth(s) <= maxPx) return s.length();
-        int lo=0, hi=s.length();
+        int lo = 0, hi = s.length();
         while (lo < hi) {
-            int mid = (lo+hi+1)/2;
-            if (f.getStringWidth(s.substring(0, mid)) <= maxPx) lo = mid; else hi = mid-1;
+            int mid = (lo + hi + 1) / 2;
+            if (f.getStringWidth(s.substring(0, mid)) <= maxPx) lo = mid;
+            else hi = mid - 1;
         }
         return lo;
     }
@@ -123,18 +124,23 @@ public class Line {
 
     private static String getActiveFormatting(String s) {
         String color = "";
-        boolean k=false, l=false, m=false, n=false, o=false;
+        boolean k = false, l = false, m = false, n = false, o = false;
 
-        for (int i=0; i < s.length()-1; i++) if (s.charAt(i) == '§') {
-            char c = Character.toLowerCase(s.charAt(i+1));
-            if (c == 'r') { color=""; k=l=m=n=o=false; }
-            else if ((c>='0'&&c<='9') || (c>='a'&&c<='f')) { color = "§" + c; k=l=m=n=o=false; }
-            else if (c=='k') k=true;
-            else if (c=='l') l=true;
-            else if (c=='m') m=true;
-            else if (c=='n') n=true;
-            else if (c=='o') o=true;
-        }
+        for (int i = 0; i < s.length() - 1; i++)
+            if (s.charAt(i) == '§') {
+                char c = Character.toLowerCase(s.charAt(i + 1));
+                if (c == 'r') {
+                    color = "";
+                    k = l = m = n = o = false;
+                } else if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+                    color = "§" + c;
+                    k = l = m = n = o = false;
+                } else if (c == 'k') k = true;
+                else if (c == 'l') l = true;
+                else if (c == 'm') m = true;
+                else if (c == 'n') n = true;
+                else if (c == 'o') o = true;
+            }
         StringBuilder out = new StringBuilder();
         if (!color.isEmpty()) out.append(color);
         if (k) out.append("§k");

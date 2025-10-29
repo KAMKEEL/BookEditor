@@ -8,7 +8,8 @@ import java.lang.reflect.Method;
 public final class FontRendererPrivate {
     private static volatile Method SIZE_TO_WIDTH; // int sizeStringToWidth(String, int)
 
-    private FontRendererPrivate() {}
+    private FontRendererPrivate() {
+    }
 
     // Resolve and cache the private method (MCP first, SRG fallback)
     private static Method resolve() {
@@ -31,7 +32,7 @@ public final class FontRendererPrivate {
                     // Both failed—bubble an informative exception
                     NoSuchMethodError err = new NoSuchMethodError(
                         "FontRenderer.sizeStringToWidth/func_78259_e(String,int) not found. " +
-                        "Dev mappings or environment might be mismatched."
+                            "Dev mappings or environment might be mismatched."
                     );
                     err.initCause(first); // keep the first failure for context
                     throw err;
@@ -46,8 +47,9 @@ public final class FontRendererPrivate {
 
     /**
      * Calls the exact (possibly mixin-patched) FontRenderer.sizeStringToWidth.
-     * @param fr the FontRenderer (must be non-null and initialized)
-     * @param text text to measure
+     *
+     * @param fr    the FontRenderer (must be non-null and initialized)
+     * @param text  text to measure
      * @param width max width in pixels
      * @return number of characters that fit according to the real method
      */

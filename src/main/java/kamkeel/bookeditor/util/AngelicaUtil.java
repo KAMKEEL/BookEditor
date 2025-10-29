@@ -49,7 +49,7 @@ public final class AngelicaUtil {
      * </ul>
      *
      * @return The number of characters that belong to the code or {@code 0}
-     *         when no code starts at {@code index}.
+     * when no code starts at {@code index}.
      */
     public static int detectAngelicaColorCodeLength(CharSequence text, int index) {
         if (text == null || index < 0 || index >= text.length()) {
@@ -93,8 +93,8 @@ public final class AngelicaUtil {
      * Attempts to find the start position of a formatting code that ends at {@code endExclusive}.
      * The returned index can be used as the "from" argument when removing the code.
      *
-     * @param text          The text that potentially contains a code.
-     * @param endExclusive  Index immediately after the code.
+     * @param text         The text that potentially contains a code.
+     * @param endExclusive Index immediately after the code.
      * @return The start index of the code or {@code -1} if no code terminates at {@code endExclusive}.
      */
     public static int findAngelicaColorCodeStart(CharSequence text, int endExclusive) {
@@ -161,7 +161,7 @@ public final class AngelicaUtil {
         }
 
         StringBuilder sanitized = new StringBuilder(text.length());
-        for (int i = 0; i < text.length();) {
+        for (int i = 0; i < text.length(); ) {
             int codeLength = detectAngelicaColorCodeLength(text, i);
             if (codeLength > 0) {
                 if (i + codeLength <= text.length()) {

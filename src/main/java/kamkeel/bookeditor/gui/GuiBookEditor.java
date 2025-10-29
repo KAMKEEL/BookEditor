@@ -6,14 +6,13 @@ package kamkeel.bookeditor.gui;
  * operations.
  */
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.Printer;
 import kamkeel.bookeditor.book.Book;
 import kamkeel.bookeditor.book.Line;
 import kamkeel.bookeditor.book.Page;
+import kamkeel.bookeditor.constants.Buttons;
+import kamkeel.bookeditor.util.AngelicaUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -27,8 +26,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import kamkeel.bookeditor.constants.Buttons;
-import kamkeel.bookeditor.util.AngelicaUtil;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiBookEditor extends GuiScreen {
     private Minecraft mc = Minecraft.getMinecraft();
@@ -334,7 +335,7 @@ public class GuiBookEditor extends GuiScreen {
     protected void keyTyped(char character, int keycode) {
         switch (character) {
             case '\026':
-                if(this.heldBookIsWritable){
+                if (this.heldBookIsWritable) {
                     this.book.addTextAtCursor(GuiScreen.getClipboardString());
                 }
                 return;
@@ -357,18 +358,18 @@ public class GuiBookEditor extends GuiScreen {
                     this.book.moveCursor(Book.CursorDirection.DOWN);
                 return;
             case 14:
-                if(this.heldBookIsWritable){
+                if (this.heldBookIsWritable) {
                     this.book.removeChar(false);
                 }
                 return;
             case 211:
-                if(this.heldBookIsWritable){
+                if (this.heldBookIsWritable) {
                     this.book.removeChar(true);
                 }
                 return;
             case 28:
             case 156:
-                if(this.heldBookIsWritable){
+                if (this.heldBookIsWritable) {
                     this.book.addTextAtCursor("\n");
                 }
                 return;
@@ -376,7 +377,7 @@ public class GuiBookEditor extends GuiScreen {
                 this.mc.displayGuiScreen((GuiScreen) null);
                 return;
         }
-        if(this.heldBookIsWritable){
+        if (this.heldBookIsWritable) {
             if (ChatAllowedCharacters.isAllowedCharacter(character))
                 this.book.addTextAtCursor(Character.toString(character));
         }

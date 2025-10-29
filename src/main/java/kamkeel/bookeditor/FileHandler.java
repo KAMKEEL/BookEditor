@@ -5,26 +5,19 @@ package kamkeel.bookeditor;
  * basic text files. Also manages file browsing logic used by the GUI.
  */
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.book.Line;
+import kamkeel.bookeditor.book.Page;
+import net.minecraft.client.Minecraft;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
-import kamkeel.bookeditor.book.Book;
-import net.minecraft.client.Minecraft;
-import org.apache.commons.lang3.StringUtils;
-import kamkeel.bookeditor.book.Line;
-import kamkeel.bookeditor.book.Page;
 
 public class FileHandler {
     private File defaultPath;
@@ -166,7 +159,7 @@ public class FileHandler {
         boolean failedFlag = false;
         File path = filePath.getParentFile();
         if (!path.exists() &&
-                !path.mkdirs())
+            !path.mkdirs())
             failedFlag = true;
         if (!failedFlag)
             try {

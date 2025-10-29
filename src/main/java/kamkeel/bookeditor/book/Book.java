@@ -8,10 +8,9 @@ package kamkeel.bookeditor.book;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import kamkeel.bookeditor.FileHandler;
+import kamkeel.bookeditor.Printer;
+import kamkeel.bookeditor.util.AngelicaUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.init.Items;
@@ -23,15 +22,15 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
-import kamkeel.bookeditor.FileHandler;
-import kamkeel.bookeditor.Printer;
-import kamkeel.bookeditor.util.AngelicaUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Book {
     public static final String[] FORMAT_CODES = new String[]{
-            "\u00a70", "\u00a71", "\u00a72", "\u00a73", "\u00a74", "\u00a75", "\u00a76", "\u00a77",
-            "\u00a78", "\u00a79", "\u00a7a", "\u00a7b", "\u00a7c", "\u00a7d", "\u00a7e", "\u00a7f",
-            "\u00a7k", "\u00a7l", "\u00a7m", "\u00a7n", "\u00a7o", "\u00a7r"
+        "\u00a70", "\u00a71", "\u00a72", "\u00a73", "\u00a74", "\u00a75", "\u00a76", "\u00a77",
+        "\u00a78", "\u00a79", "\u00a7a", "\u00a7b", "\u00a7c", "\u00a7d", "\u00a7e", "\u00a7f",
+        "\u00a7k", "\u00a7l", "\u00a7m", "\u00a7n", "\u00a7o", "\u00a7r"
     };
 
     public List<Page> pages = new ArrayList<Page>();
@@ -192,8 +191,7 @@ public class Book {
                         this.cursorPage + 1, 0, 1);
                 }
             }
-        }
-        else {
+        } else {
             // =============================
             // "Backspace" logic (FIXED)
             // =============================
@@ -218,8 +216,7 @@ public class Book {
                 } else {
                     removeText(cursorPage, cursorLine, cursorPosChars - 1, cursorPage, cursorLine, cursorPosChars);
                 }
-            }
-            else if (this.cursorLine > 0) {
+            } else if (this.cursorLine > 0) {
                 // Backspace at the start of a line. Remove the character just
                 // before the cursor which may be a newline inserted when the
                 // user pressed Enter or simply the last character of the
@@ -231,8 +228,7 @@ public class Book {
 
                 removeText(this.cursorPage, this.cursorLine - 1, removeIndex,
                     this.cursorPage, this.cursorLine, this.cursorPosChars);
-            }
-            else if (this.cursorPage > 0) {
+            } else if (this.cursorPage > 0) {
                 // Backspace at the start of the first line in the page: join with previous page
                 Page currPage = this.pages.get(this.cursorPage - 1);
                 int lineNum = currPage.lines.size() - 1;
@@ -242,8 +238,6 @@ public class Book {
             }
         }
     }
-
-
 
 
     public void removeText(int fromPage, int fromLine, int fromChar, int toPage, int toLine, int toChar) {
@@ -606,7 +600,7 @@ public class Book {
 
         if (totalPages() > 0) {
             for (int i = totalPages() - 1; i >= 0 && (
-                    (Page) this.pages.get(i)).asString().isEmpty(); i--) {
+                (Page) this.pages.get(i)).asString().isEmpty(); i--) {
                 if (i == 0) {
                     System.out.println("Can't save an empty book! Aborting!");
                     return;

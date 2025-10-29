@@ -5,9 +5,6 @@ package kamkeel.bookeditor.gui;
  * a scrollable list of files and directories from the configured book folder.
  */
 
-import java.io.File;
-import java.util.List;
-
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.book.Book;
 import kamkeel.bookeditor.book.Page;
@@ -16,6 +13,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiSlot;
 import net.minecraft.client.renderer.Tessellator;
+
+import java.io.File;
+import java.util.List;
 
 public class GuiFileBrowser extends GuiScreen {
     private List<File> listItems;
