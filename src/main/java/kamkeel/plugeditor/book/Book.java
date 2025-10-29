@@ -25,7 +25,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import kamkeel.plugeditor.FileHandler;
 import kamkeel.plugeditor.Printer;
-import kamkeel.plugeditor.util.AngelicaUtil;
+import kamkeel.plugeditor.util.BookTextFormatter;
+import kamkeel.plugeditor.util.MinecraftBookUtil;
 
 public class Book {
     public static final String[] FORMAT_CODES = new String[]{
@@ -145,6 +146,7 @@ public class Book {
     public void removeChar(boolean nextChar) {
         // Retrieve current line
         Line currLine = this.pages.get(this.cursorPage).lines.get(this.cursorLine);
+        BookTextFormatter formatter = BookController.getInstance().getTextFormatter();
 
         if (nextChar) {
             // =============================
@@ -154,9 +156,9 @@ public class Book {
                 int removeEnd = this.cursorPosChars;
                 boolean removedFormatting = false;
 
-                // Scan forward to delete any Angelica formatting codes.
+                // Scan forward to delete any formatting codes.
                 while (removeEnd < currLine.text.length()) {
-                    int codeLength = AngelicaUtil.detectAngelicaColorCodeLength(currLine.text, removeEnd);
+                    int codeLength = formatter.detectColorCodeLength(currLine.text, removeEnd);
                     if (codeLength > 0) {
                         removeEnd += codeLength;
                         removedFormatting = true;
@@ -202,7 +204,7 @@ public class Book {
                 boolean removedAny = false;
 
                 while (removeStart > 0) {
-                    int codeStart = AngelicaUtil.findAngelicaColorCodeStart(currLine.text, removeStart);
+                    int codeStart = formatter.findColorCodeStart(currLine.text, removeStart);
                     if (codeStart >= 0) {
                         removedAny = true;
                         removeStart = codeStart;
@@ -597,9 +599,10 @@ public class Book {
     public void sendBookToServer(boolean signIt) {
         System.out.println("Sending book to server!");
         Minecraft minecraft = Minecraft.getMinecraft();
-        ItemStack bookObj = AngelicaUtil.safeGetHeldItem(minecraft);
+        ItemStack bookObj = MinecraftBookUtil.safeGetHeldItem(minecraft);
+        BookTextFormatter formatter = BookController.getInstance().getTextFormatter();
 
-        if (!AngelicaUtil.isWritableBook(bookObj)) {
+        if (!MinecraftBookUtil.isWritableBook(bookObj)) {
             Printer.gamePrint(Printer.RED + "You must hold a writable book to save.");
             return;
         }
@@ -628,7 +631,7 @@ public class Book {
                     fh.saveBookToGHBFile(this);
                     break;
                 }
-                String pageText = AngelicaUtil.sanitizeAngelicaFormatting(page.asString());
+                String pageText = formatter.sanitizeFormatting(page.asString());
                 bookPages.appendTag((NBTBase) new NBTTagString(pageText));
             }
             if (bookObj.hasTagCompound()) {
@@ -702,6 +705,7 @@ public class Book {
     }
 
     public static String removeFormatting(String strIn) {
-        return strIn.replaceAll("\u00a7[0-9a-fA-Fk-oK-OrR]?", "");
+        BookTextFormatter formatter = BookController.getInstance().getTextFormatter();
+        return formatter.stripColorCodes(strIn);
     }
 }
