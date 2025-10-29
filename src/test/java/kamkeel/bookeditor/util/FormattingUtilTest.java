@@ -1,11 +1,18 @@
 package kamkeel.bookeditor.util;
 
+import kamkeel.bookeditor.book.BookController;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FormattingUtilTest {
+
+    @Before
+    public void resetFormatter() {
+        BookController.overrideFormatterForTesting(BookController.getStandaloneFormatter());
+    }
 
     @Test
     public void detectFormattingCodeLengthHandlesValidCodes() {
@@ -32,5 +39,10 @@ public class FormattingUtilTest {
     public void sanitizeFormattingKeepsValidSequences() {
         String formatted = "§aGreen §lBold";
         assertThat(FormattingUtil.sanitizeFormatting(formatted), is(formatted));
+    }
+
+    @Test
+    public void stripColorCodesRemovesLegacyCodes() {
+        assertThat(FormattingUtil.stripColorCodes("§aGreen"), is("Green"));
     }
 }
