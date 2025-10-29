@@ -3,6 +3,8 @@ package kamkeel.bookeditor.util;
 import java.util.Arrays;
 import java.util.List;
 
+import kamkeel.bookeditor.book.BookController;
+
 /**
  * Collection of helpers related to measuring and wrapping line content.
  * The heavy lifting used to live inside {@code Line}; extracting it keeps the
@@ -11,23 +13,26 @@ import java.util.List;
 public final class LineFormattingUtil {
     public static final int BOOK_TEXT_WIDTH = 116;
 
-    private static volatile TextMetrics metrics = new MinecraftTextMetrics();
-
     private LineFormattingUtil() {
     }
 
     public static void setMetrics(TextMetrics newMetrics) {
-        metrics = newMetrics != null ? newMetrics : new MinecraftTextMetrics();
+        BookController.getFormatter().setTextMetrics(newMetrics);
     }
 
     public static TextMetrics getMetrics() {
-        return metrics;
+        return BookController.getFormatter().getTextMetrics();
+    }
+
+    private static TextMetrics metrics() {
+        return getMetrics();
     }
 
     public static int sizeStringToApproxWidthBlind(String str, int lenPixels) {
         if (str == null) {
             return 0;
         }
+        TextMetrics metrics = metrics();
         if (metrics.stringWidth(str) <= lenPixels) {
             return str.length();
         }
@@ -49,6 +54,7 @@ public final class LineFormattingUtil {
         if (s == null || maxPx <= 0) {
             return 0;
         }
+        TextMetrics metrics = metrics();
         if (metrics.stringWidth(s) <= maxPx) {
             return s.length();
         }
@@ -69,7 +75,7 @@ public final class LineFormattingUtil {
         if (s == null) {
             return 0;
         }
-        return metrics.sizeStringToWidth(s, maxPx);
+        return metrics().sizeStringToWidth(s, maxPx);
     }
 
     public static List<String> listFormattedStringToWidth(String str, String wrappedFormatting) {
@@ -102,74 +108,22 @@ public final class LineFormattingUtil {
     }
 
     public static String getActiveFormatting(String s) {
-        if (s == null) {
-            return "";
-        }
-        String color = "";
-        boolean k = false, l = false, m = false, n = false, o = false;
-        for (int i = 0; i < s.length() - 1; i++) {
-            if (s.charAt(i) == '§') {
-                char c = Character.toLowerCase(s.charAt(i + 1));
-                if (c == 'r') {
-                    color = "";
-                    k = l = m = n = o = false;
-                } else if (isFormatColor(c)) {
-                    color = "§" + c;
-                    k = l = m = n = o = false;
-                } else if (c == 'k') {
-                    k = true;
-                } else if (c == 'l') {
-                    l = true;
-                } else if (c == 'm') {
-                    m = true;
-                } else if (c == 'n') {
-                    n = true;
-                } else if (c == 'o') {
-                    o = true;
-                }
-            }
-        }
-        StringBuilder out = new StringBuilder();
-        if (!color.isEmpty()) out.append(color);
-        if (k) out.append("§k");
-        if (l) out.append("§l");
-        if (m) out.append("§m");
-        if (n) out.append("§n");
-        if (o) out.append("§o");
-        return out.toString();
+        return BookController.getFormatter().getActiveFormatting(s);
     }
 
     public static String getFormatFromString(String str) {
-        if (str == null) {
-            return "";
-        }
-        String s1 = "";
-        int i = -1;
-        int j = str.length();
-        while ((i = str.indexOf('§', i + 1)) != -1) {
-            if (i < j - 1) {
-                char c0 = str.charAt(i + 1);
-                if (isFormatColor(c0)) {
-                    s1 = "§" + c0;
-                    continue;
-                }
-                if (isFormatSpecial(c0)) {
-                    s1 = s1 + "§" + c0;
-                }
-            }
-        }
-        return s1;
+        return BookController.getFormatter().getFormatFromString(str);
     }
 
     public static boolean isFormatSpecial(char par0) {
-        return ((par0 >= 'k' && par0 <= 'o') || (par0 >= 'K' && par0 <= 'O') || par0 == 'r' || par0 == 'R');
+        return BookController.getFormatter().isFormatSpecial(par0);
     }
 
     public static boolean isFormatColor(char par0) {
-        return ((par0 >= '0' && par0 <= '9') || (par0 >= 'a' && par0 <= 'f') || (par0 >= 'A' && par0 <= 'F'));
+        return BookController.getFormatter().isFormatColor(par0);
     }
 
     public static int getStringWidth(String strIn) {
-        return metrics.stringWidth(strIn);
+        return metrics().stringWidth(strIn);
     }
 }

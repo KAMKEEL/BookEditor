@@ -33,4 +33,10 @@ public class FormattingUtilTest {
         String formatted = "§aGreen §lBold";
         assertThat(FormattingUtil.sanitizeFormatting(formatted), is(formatted));
     }
+
+    @Test
+    public void stripColorCodesRemovesFormattingSequences() {
+        assertThat(FormattingUtil.stripColorCodes("§aGreen"), is("Green"));
+        assertThat(FormattingUtil.stripColorCodes("Plain"), is("Plain"));
+    }
 }
