@@ -1,19 +1,41 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.format.BookFormatter;
+import kamkeel.bookeditor.format.HexTextBookFormatter;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@RunWith(Parameterized.class)
 public class BookTextHelperTest {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+            {"Standalone", new StandaloneBookFormatter()},
+            {"HexText", new HexTextBookFormatter()}
+        });
+    }
+
+    private final BookFormatter formatter;
+
+    public BookTextHelperTest(String name, BookFormatter formatter) {
+        this.formatter = formatter;
+    }
 
     @Before
     public void setUpMetrics() {
+        BookController.overrideFormatterForTesting(formatter);
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
     }
 

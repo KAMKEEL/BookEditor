@@ -1,5 +1,6 @@
 package kamkeel.bookeditor.util;
 
+import kamkeel.bookeditor.book.BookController;
 import kamkeel.bookeditor.book.Line;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ public class LineFormattingUtilTest {
 
     @Before
     public void setUpMetrics() {
+        BookController.overrideFormatterForTesting(BookController.getStandaloneFormatter());
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
     }
 
@@ -22,6 +24,14 @@ public class LineFormattingUtilTest {
         String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
         assertThat(segments.length > 1, is(true));
         assertThat(segments[0].endsWith(" "), is(true));
+    }
+
+    @Test
+    public void wrapStringToWidthPrefersPreviousWhitespaceWhenOverLimit() {
+        String wrapped = LineFormattingUtil.wrapStringToWidth("Word1 Word2 Word3", 60, "");
+        String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
+        assertThat("First segment should not cut Word2", segments[0], is("Word1 "));
+        assertThat("Second segment should start with Word2", segments[1].startsWith("Word2"), is(true));
     }
 
     @Test
