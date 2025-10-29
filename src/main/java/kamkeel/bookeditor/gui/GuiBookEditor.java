@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.gui;
+package kamkeel.bookeditor.gui;
 
 /**
  * Main book editing GUI that replaces Minecraft's default book screen. Allows
@@ -9,11 +9,11 @@ package kamkeel.plugeditor.gui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import kamkeel.plugeditor.FileHandler;
-import kamkeel.plugeditor.Printer;
-import kamkeel.plugeditor.book.Book;
-import kamkeel.plugeditor.book.Line;
-import kamkeel.plugeditor.book.Page;
+import kamkeel.bookeditor.FileHandler;
+import kamkeel.bookeditor.Printer;
+import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.book.Line;
+import kamkeel.bookeditor.book.Page;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -27,10 +27,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import kamkeel.plugeditor.constants.Buttons;
-import kamkeel.plugeditor.util.AngelicaUtil;
+import kamkeel.bookeditor.constants.Buttons;
+import kamkeel.bookeditor.util.AngelicaUtil;
 
-public class GuiPlugBook extends GuiScreen {
+public class GuiBookEditor extends GuiScreen {
     private Minecraft mc = Minecraft.getMinecraft();
     private int updateCount = 0;
     private int bookImageWidth = 192;
@@ -80,7 +80,7 @@ public class GuiPlugBook extends GuiScreen {
     private ItemStack mcBookObj;
     private FileHandler fileHandler = new FileHandler();
 
-    public GuiPlugBook(Book _bookClipboard, List<String> _pageClipboard) {
+    public GuiBookEditor(Book _bookClipboard, List<String> _pageClipboard) {
         this.bookClipboard = _bookClipboard;
         this.pageClipboard = _pageClipboard;
         this.mcBookObj = AngelicaUtil.safeGetHeldItem(this.mc);
@@ -223,7 +223,7 @@ public class GuiPlugBook extends GuiScreen {
                 if (this.heldBookIsWritable) {
                     this.book.title = Book.truncateStringChars(this.book.title, "..", 16, false);
                     this.book.author = Book.truncateStringChars(this.book.author, "..", 16, false);
-                    this.mc.displayGuiScreen(new GuiSignPlugBook(this.book, this));
+                    this.mc.displayGuiScreen(new GuiSignBook(this.book, this));
                 }
                 return;
             case Buttons.BTN_SAVE_BOOK:
@@ -471,7 +471,7 @@ public class GuiPlugBook extends GuiScreen {
             if (this.visible) {
                 boolean flag = (p_146112_2_ >= this.xPosition && p_146112_3_ >= this.yPosition && p_146112_2_ < this.xPosition + this.width && p_146112_3_ < this.yPosition + this.height);
                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.getTextureManager().bindTexture(GuiPlugBook.bookGuiTextures);
+                mc.getTextureManager().bindTexture(GuiBookEditor.bookGuiTextures);
                 int k = 0;
                 int l = 192;
                 if (flag)

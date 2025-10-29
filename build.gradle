@@ -5,10 +5,10 @@ plugins {
     id 'idea'
 }
 
-group= "kamkeel.plugeditor"
+group= "kamkeel.bookeditor"
 
 tasks.runServer { setWorkingDir(file("run/server")) }
 
-version = "1.3"
-group= "kamkeel.plugeditor"
-archivesBaseName = "plugeditor"
+version = "1.0"
+group= "kamkeel.bookeditor"
+archivesBaseName = "bookeditor"

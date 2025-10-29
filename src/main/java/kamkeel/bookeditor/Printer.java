@@ -1,4 +1,4 @@
-package kamkeel.plugeditor;
+package kamkeel.bookeditor;
 
 /**
  * Utility for printing coloured chat messages to the player's chat window.

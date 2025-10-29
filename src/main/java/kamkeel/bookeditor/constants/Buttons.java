@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.constants;
+package kamkeel.bookeditor.constants;
 
 /**
  * Numeric IDs used by the various GUI classes for button widgets. Keeping them

@@ -1,12 +1,12 @@
-package kamkeel.plugeditor.gui;
+package kamkeel.bookeditor.gui;
 
 /**
  * GUI shown when the user is finalising a book. Allows entering the title and
  * author before the book is locked via signing.
  */
 
-import kamkeel.plugeditor.book.Book;
-import kamkeel.plugeditor.constants.Buttons;
+import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.constants.Buttons;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -14,7 +14,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-public class GuiSignPlugBook extends GuiScreen {
+public class GuiSignBook extends GuiScreen {
     private int bookImageWidth = 192;
     private int bookImageHeight = 192;
     private static final ResourceLocation bookGuiTextures = new ResourceLocation("textures/gui/book.png");
@@ -24,9 +24,9 @@ public class GuiSignPlugBook extends GuiScreen {
     // The sign GUI now uses ButtonIds for its buttons.
     private GuiButton btnFinalise;
     private Book book;
-    private GuiPlugBook parentScreen;
+    private GuiBookEditor parentScreen;
 
-    public GuiSignPlugBook(Book _book, GuiPlugBook _parentScreen) {
+    public GuiSignBook(Book _book, GuiBookEditor _parentScreen) {
         this.book = _book;
         this.parentScreen = _parentScreen;
     }

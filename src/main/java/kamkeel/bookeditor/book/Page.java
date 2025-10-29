@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.book;
+package kamkeel.bookeditor.book;
 
 /**
  * Represents a single page in a Book. A Page is composed of multiple Lines and

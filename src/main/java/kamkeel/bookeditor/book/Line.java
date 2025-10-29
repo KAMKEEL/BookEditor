@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.book;
+package kamkeel.bookeditor.book;
 
 /**
  * Represents a single line of text inside a book page. Handles text wrapping
@@ -9,7 +9,7 @@ package kamkeel.plugeditor.book;
 import java.util.Arrays;
 import java.util.List;
 
-import kamkeel.plugeditor.util.FontRendererPrivate;
+import kamkeel.bookeditor.util.FontRendererPrivate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 

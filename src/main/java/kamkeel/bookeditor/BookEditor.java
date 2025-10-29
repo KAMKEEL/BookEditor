@@ -1,7 +1,7 @@
-package kamkeel.plugeditor;
+package kamkeel.bookeditor;
 
 /**
- * Entry point Forge mod that installs the plug editor functionality. This class
+ * Entry point Forge mod that installs the book editor functionality. This class
  * listens to game ticks to swap out the regular book GUI with the editable
  * version and manages clipboard state for copying and pasting pages.
  */
@@ -14,19 +14,19 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import kamkeel.plugeditor.book.Book;
+import kamkeel.bookeditor.book.Book;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
-import kamkeel.plugeditor.gui.GuiPlugBook;
+import kamkeel.bookeditor.gui.GuiBookEditor;
 
-import static kamkeel.plugeditor.PlugEditor.*;
+import static kamkeel.bookeditor.BookEditor.*;
 
 @Mod(modid = MODID, version = VERSION, name = NAME)
-public class PlugEditor {
-    public static final String MODID = "plugeditor";
-    public static final String VERSION = "1.2";
-    public static final String NAME = "Plug Editor";
+public class BookEditor {
+    public static final String MODID = "bookeditor";
+    public static final String VERSION = "1.0";
+    public static final String NAME = "Book Editor";
 
     private Minecraft mc = Minecraft.getMinecraft();
 
@@ -42,7 +42,7 @@ public class PlugEditor {
 
     private List<String> pageClipboard;
 
-    public PlugEditor() {
+    public BookEditor() {
         FMLCommonHandler.instance().bus().register(this);
         MinecraftForge.EVENT_BUS.register(this);
         this.bookClipboard = new Book();
@@ -53,7 +53,7 @@ public class PlugEditor {
     public void tick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             if (this.mc.currentScreen instanceof net.minecraft.client.gui.GuiScreenBook)
-                this.mc.displayGuiScreen((GuiScreen) new GuiPlugBook(this.bookClipboard, this.pageClipboard));
+                this.mc.displayGuiScreen((GuiScreen) new GuiBookEditor(this.bookClipboard, this.pageClipboard));
             if (!this.firstGuiOpen &&
                     this.firstGuiOpenWait-- <= 0)
                 this.firstGuiOpen = true;

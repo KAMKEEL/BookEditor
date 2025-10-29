@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.gui;
+package kamkeel.bookeditor.gui;
 
 /**
  * Simple file browser used for selecting books to load or preview. It displays
@@ -8,9 +8,9 @@ package kamkeel.plugeditor.gui;
 import java.io.File;
 import java.util.List;
 
-import kamkeel.plugeditor.FileHandler;
-import kamkeel.plugeditor.book.Book;
-import kamkeel.plugeditor.book.Page;
+import kamkeel.bookeditor.FileHandler;
+import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.book.Page;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -38,7 +38,7 @@ public class GuiFileBrowser extends GuiScreen {
 
     private FileHandler fileHandler = new FileHandler();
 
-    private GuiPlugBook parentScreen;
+    private GuiBookEditor parentScreen;
 
     private Book tempBook;
 
@@ -50,7 +50,7 @@ public class GuiFileBrowser extends GuiScreen {
 
     private String previewPage = "";
 
-    public GuiFileBrowser(GuiPlugBook _parentScreen) {
+    public GuiFileBrowser(GuiBookEditor _parentScreen) {
         this.parentScreen = _parentScreen;
     }
 

@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.book;
+package kamkeel.bookeditor.book;
 
 /**
  * Core data model representing a writable Minecraft book. The Book manages
@@ -23,9 +23,9 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
-import kamkeel.plugeditor.FileHandler;
-import kamkeel.plugeditor.Printer;
-import kamkeel.plugeditor.util.AngelicaUtil;
+import kamkeel.bookeditor.FileHandler;
+import kamkeel.bookeditor.Printer;
+import kamkeel.bookeditor.util.AngelicaUtil;
 
 public class Book {
     public static final String[] FORMAT_CODES = new String[]{

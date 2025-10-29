@@ -1,4 +1,4 @@
-package kamkeel.plugeditor;
+package kamkeel.bookeditor;
 
 /**
  * Handles reading and writing books to disk in both the custom GHB format and
@@ -20,11 +20,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import kamkeel.plugeditor.book.Book;
+import kamkeel.bookeditor.book.Book;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.StringUtils;
-import kamkeel.plugeditor.book.Line;
-import kamkeel.plugeditor.book.Page;
+import kamkeel.bookeditor.book.Line;
+import kamkeel.bookeditor.book.Page;
 
 public class FileHandler {
     private File defaultPath;
@@ -43,7 +43,7 @@ public class FileHandler {
         String path = (Minecraft.getMinecraft()).mcDataDir.getAbsolutePath();
         if (path.endsWith("."))
             path = path.substring(0, path.length() - 2);
-        this.defaultPath = new File(path, "mods" + File.separator + "PlugBook");
+        this.defaultPath = new File(path, "mods" + File.separator + "Books");
         if (!this.defaultPath.exists())
             this.defaultPath.mkdirs();
         this.bookSavePath = new File(this.defaultPath, "SavedBooks");
@@ -176,7 +176,7 @@ public class FileHandler {
                 out.close();
             } catch (IOException e) {
                 failedFlag = true;
-                System.out.println("PlugBook: Write failed!");
+                System.out.println("Book Editor: Write failed!");
                 System.out.println(e.getMessage());
                 return false;
             }

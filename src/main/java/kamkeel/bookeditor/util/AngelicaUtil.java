@@ -1,4 +1,4 @@
-package kamkeel.plugeditor.util;
+package kamkeel.bookeditor.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
