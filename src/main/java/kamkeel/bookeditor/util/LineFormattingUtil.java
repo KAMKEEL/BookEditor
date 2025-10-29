@@ -1,5 +1,8 @@
 package kamkeel.bookeditor.util;
 
+import kamkeel.bookeditor.book.BookController;
+import kamkeel.bookeditor.format.BookFormatter;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,7 +83,7 @@ public final class LineFormattingUtil {
     }
 
     public static String wrapStringToWidth(String strIn, int maxWidth, String wrappedFormatting) {
-        if (strIn == null) {
+        if (strIn == null || strIn.isEmpty()) {
             return "";
         }
         int maxCharsInWidth = sizeStringToWidth(wrappedFormatting + strIn, maxWidth) - wrappedFormatting.length();
@@ -90,86 +93,69 @@ public final class LineFormattingUtil {
         if (strIn.length() <= maxCharsInWidth) {
             return strIn;
         }
-        String firstSegment = strIn.substring(0, Math.min(maxCharsInWidth, strIn.length()));
-        char splitChar = strIn.charAt(Math.min(maxCharsInWidth, strIn.length() - 1));
-        boolean newlineOrSpace = maxCharsInWidth < strIn.length() && (splitChar == ' ' || splitChar == '\n');
-        String remainder = strIn.substring(Math.min(maxCharsInWidth + (newlineOrSpace ? 1 : 0), strIn.length()));
-        if (newlineOrSpace && maxCharsInWidth < strIn.length()) {
-            firstSegment = firstSegment + splitChar;
+        int candidateEnd = Math.min(maxCharsInWidth, strIn.length());
+        int splitIndex = findSplitIndex(strIn, candidateEnd);
+        int firstEnd = splitIndex >= 0 ? splitIndex + 1 : candidateEnd;
+        if (firstEnd <= 0) {
+            firstEnd = candidateEnd;
         }
+
+        String firstSegment = strIn.substring(0, firstEnd);
+        int remainderStart = firstEnd;
+
+        while (firstSegment.endsWith("\u00a7") && remainderStart < strIn.length()) {
+            firstSegment = strIn.substring(0, ++remainderStart);
+        }
+
+        if (remainderStart >= strIn.length()) {
+            return firstSegment;
+        }
+
+        String remainder = strIn.substring(remainderStart);
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
         return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
     }
 
+    private static int findSplitIndex(String text, int candidateEnd) {
+        int lastNewline = text.lastIndexOf('\n', Math.max(0, candidateEnd - 1));
+        if (lastNewline >= 0) {
+            return lastNewline;
+        }
+        if (candidateEnd < text.length() && text.charAt(candidateEnd) == '\n') {
+            return candidateEnd;
+        }
+
+        int lastSpace = text.lastIndexOf(' ', Math.max(0, candidateEnd - 1));
+        if (lastSpace >= 0) {
+            return lastSpace;
+        }
+        if (candidateEnd < text.length() && text.charAt(candidateEnd) == ' ') {
+            return candidateEnd;
+        }
+        return -1;
+    }
+
     public static String getActiveFormatting(String s) {
-        if (s == null) {
-            return "";
-        }
-        String color = "";
-        boolean k = false, l = false, m = false, n = false, o = false;
-        for (int i = 0; i < s.length() - 1; i++) {
-            if (s.charAt(i) == '§') {
-                char c = Character.toLowerCase(s.charAt(i + 1));
-                if (c == 'r') {
-                    color = "";
-                    k = l = m = n = o = false;
-                } else if (isFormatColor(c)) {
-                    color = "§" + c;
-                    k = l = m = n = o = false;
-                } else if (c == 'k') {
-                    k = true;
-                } else if (c == 'l') {
-                    l = true;
-                } else if (c == 'm') {
-                    m = true;
-                } else if (c == 'n') {
-                    n = true;
-                } else if (c == 'o') {
-                    o = true;
-                }
-            }
-        }
-        StringBuilder out = new StringBuilder();
-        if (!color.isEmpty()) out.append(color);
-        if (k) out.append("§k");
-        if (l) out.append("§l");
-        if (m) out.append("§m");
-        if (n) out.append("§n");
-        if (o) out.append("§o");
-        return out.toString();
+        return formatter().getActiveFormatting(s);
     }
 
     public static String getFormatFromString(String str) {
-        if (str == null) {
-            return "";
-        }
-        String s1 = "";
-        int i = -1;
-        int j = str.length();
-        while ((i = str.indexOf('§', i + 1)) != -1) {
-            if (i < j - 1) {
-                char c0 = str.charAt(i + 1);
-                if (isFormatColor(c0)) {
-                    s1 = "§" + c0;
-                    continue;
-                }
-                if (isFormatSpecial(c0)) {
-                    s1 = s1 + "§" + c0;
-                }
-            }
-        }
-        return s1;
+        return formatter().getFormatFromString(str);
     }
 
     public static boolean isFormatSpecial(char par0) {
-        return ((par0 >= 'k' && par0 <= 'o') || (par0 >= 'K' && par0 <= 'O') || par0 == 'r' || par0 == 'R');
+        return formatter().isFormatSpecial(par0);
     }
 
     public static boolean isFormatColor(char par0) {
-        return ((par0 >= '0' && par0 <= '9') || (par0 >= 'a' && par0 <= 'f') || (par0 >= 'A' && par0 <= 'F'));
+        return formatter().isFormatColor(par0);
     }
 
     public static int getStringWidth(String strIn) {
         return metrics.stringWidth(strIn);
+    }
+
+    private static BookFormatter formatter() {
+        return BookController.getFormatter();
     }
 }

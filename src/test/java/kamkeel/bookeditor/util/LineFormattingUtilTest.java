@@ -1,5 +1,6 @@
 package kamkeel.bookeditor.util;
 
+import kamkeel.bookeditor.book.BookController;
 import kamkeel.bookeditor.book.Line;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ public class LineFormattingUtilTest {
 
     @Before
     public void setUpMetrics() {
+        BookController.overrideFormatterForTesting(BookController.getStandaloneFormatter());
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
     }
 
@@ -22,6 +24,14 @@ public class LineFormattingUtilTest {
         String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
         assertThat(segments.length > 1, is(true));
         assertThat(segments[0].endsWith(" "), is(true));
+    }
+
+    @Test
+    public void wrapStringToWidthPrefersEarlierWhitespace() {
+        String wrapped = LineFormattingUtil.wrapStringToWidth("Hello there friend", 60, "");
+        String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
+        assertThat(segments[0], is("Hello "));
+        assertThat(segments[1].startsWith("there"), is(true));
     }
 
     @Test
