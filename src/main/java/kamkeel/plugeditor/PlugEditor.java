@@ -27,7 +27,7 @@ import static kamkeel.plugeditor.PlugEditor.*;
 @Mod(modid = MODID, version = VERSION, name = NAME)
 public class PlugEditor {
     public static final String MODID = "plugeditor";
-    public static final String VERSION = "1.3";
+    public static final String VERSION = "1.4";
     public static final String NAME = "Plug Editor";
 
     private Minecraft mc = Minecraft.getMinecraft();
