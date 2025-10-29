@@ -72,15 +72,7 @@ public class Page {
     }
 
     public static Page pad(Page page) {
-        Line lastLine = page.lines.get(page.lines.size() - 1);
-        if (Line.getStringWidth(lastLine.wrappedFormatting + lastLine.text) < 116)
-            lastLine.text += "\n";
-        while (page.lines.size() < 13) {
-            Line newLine = new Line();
-            newLine.text = "\n";
-            page.lines.add(newLine);
-        }
-        return page;
+        return PageTextUtil.pad(page);
     }
 
     public String asString() {
@@ -91,10 +83,7 @@ public class Page {
     }
 
     public int charCount() {
-        int total = 0;
-        for (Line line : this.lines)
-            total += line.text.length();
-        return total;
+        return PageTextUtil.charCount(this);
     }
 
     public void dump() {
@@ -105,10 +94,6 @@ public class Page {
     }
 
     public boolean isEmpty() {
-        for (Line line : this.lines) {
-            if (!line.text.isEmpty())
-                return false;
-        }
-        return true;
+        return PageTextUtil.isEmpty(this);
     }
 }

@@ -12,7 +12,7 @@ import kamkeel.bookeditor.book.Book;
 import kamkeel.bookeditor.book.Line;
 import kamkeel.bookeditor.book.Page;
 import kamkeel.bookeditor.constants.Buttons;
-import kamkeel.bookeditor.util.AngelicaUtil;
+import kamkeel.bookeditor.util.BookItemUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -84,8 +84,8 @@ public class GuiBookEditor extends GuiScreen {
     public GuiBookEditor(Book _bookClipboard, List<String> _pageClipboard) {
         this.bookClipboard = _bookClipboard;
         this.pageClipboard = _pageClipboard;
-        this.mcBookObj = AngelicaUtil.safeGetHeldItem(this.mc);
-        if (AngelicaUtil.isWritableBook(this.mcBookObj)) {
+        this.mcBookObj = BookItemUtil.safeGetHeldItem(this.mc);
+        if (BookItemUtil.isWritableBook(this.mcBookObj)) {
             this.heldBookIsWritable = true;
         } else if (this.mcBookObj == null) {
             this.mcBookObj = new ItemStack(Items.writable_book);
