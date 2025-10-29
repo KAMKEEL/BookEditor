@@ -27,6 +27,14 @@ public class LineFormattingUtilTest {
     }
 
     @Test
+    public void wrapStringToWidthPrefersLastSpaceBeforeLimit() {
+        String wrapped = LineFormattingUtil.wrapStringToWidth("Wrap words here please", LineFormattingUtil.BOOK_TEXT_WIDTH, "");
+        String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
+        assertThat(segments[0], is("Wrap words here "));
+        assertThat(segments[1].startsWith("please"), is(true));
+    }
+
+    @Test
     public void listFormattedStringToWidthMaintainsFormatting() {
         List<String> segments = LineFormattingUtil.listFormattedStringToWidth("§aColoured text continues", "");
         assertThat(segments.get(0).startsWith("§a"), is(true));

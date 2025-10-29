@@ -93,12 +93,28 @@ public final class LineFormattingUtil {
         if (strIn.length() <= maxCharsInWidth) {
             return strIn;
         }
-        String firstSegment = strIn.substring(0, Math.min(maxCharsInWidth, strIn.length()));
-        char splitChar = strIn.charAt(Math.min(maxCharsInWidth, strIn.length() - 1));
-        boolean newlineOrSpace = maxCharsInWidth < strIn.length() && (splitChar == ' ' || splitChar == '\n');
-        String remainder = strIn.substring(Math.min(maxCharsInWidth + (newlineOrSpace ? 1 : 0), strIn.length()));
-        if (newlineOrSpace && maxCharsInWidth < strIn.length()) {
-            firstSegment = firstSegment + splitChar;
+        int splitIndex = Math.min(maxCharsInWidth, strIn.length());
+        int breakIndex = splitIndex;
+
+        // Prefer explicit new line markers first so manual line breaks are respected.
+        int newlineIndex = strIn.lastIndexOf('\n', splitIndex - 1);
+        if (newlineIndex >= 0) {
+            breakIndex = newlineIndex + 1;
+        } else {
+            int spaceIndex = strIn.lastIndexOf(' ', splitIndex - 1);
+            if (spaceIndex >= 0) {
+                breakIndex = spaceIndex + 1;
+            }
+        }
+
+        if (breakIndex <= 0) {
+            breakIndex = splitIndex;
+        }
+
+        String firstSegment = strIn.substring(0, breakIndex);
+        String remainder = strIn.substring(breakIndex);
+        if (remainder.isEmpty()) {
+            return firstSegment;
         }
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
         return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
