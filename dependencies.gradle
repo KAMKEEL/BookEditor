@@ -37,7 +37,9 @@ dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.5.4-GTNH:dev")
     runtimeOnlyNonPublishable("curse.maven:Nashorn-374413:2924946")
 
-    implementation rfg.deobf(name: "hextext-1.0")
+    testImplementation rfg.deobf(name: "hextext-1.0")
+    compileOnly rfg.deobf(name: "hextext-1.0")
+    runtimeOnlyNonPublishable rfg.deobf(name: "hextext-1.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.hamcrest:hamcrest:2.2")
