@@ -230,8 +230,18 @@ public final class BookTextHelper {
                 book.cursorPage++;
                 book.cursorLine = 0;
                 book.cursorPosChars = 0;
+            } else if (currPage.lines.size() < PageTextUtil.MAX_LINES) {
+                Line nextLine = new Line();
+                nextLine.wrappedFormatting = currLine.getActiveFormatting();
+                currPage.lines.add(nextLine);
+                book.cursorLine++;
+                book.cursorPosChars = 0;
             } else {
-                book.cursorPosChars--;
+                Page newPage = new Page();
+                book.pages.add(newPage);
+                book.cursorPage = book.pages.size() - 1;
+                book.cursorLine = 0;
+                book.cursorPosChars = 0;
             }
         }
     }

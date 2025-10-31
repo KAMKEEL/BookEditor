@@ -195,6 +195,28 @@ public class BookTextHelperTest {
     }
 
     @Test
+    public void addingConsecutiveNewlinesAdvancesCursorDownward() {
+        Book book = createBook(createPage(""));
+
+        book.addTextAtCursor("\n");
+
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(0));
+
+        book.addTextAtCursor("\n");
+
+        assertThat(book.cursorLine, is(2));
+        assertThat(book.cursorPosChars, is(0));
+
+        Line first = book.pages.get(0).lines.get(0);
+        Line second = book.pages.get(0).lines.get(1);
+        Line third = book.pages.get(0).lines.get(2);
+        assertThat(first.text, is("\n"));
+        assertThat(second.text, is("\n"));
+        assertThat(third.text.isEmpty(), is(true));
+    }
+
+    @Test
     public void addTextOverflowsToNewPage() {
         Book book = createBook(createPage(""));
         StringBuilder builder = new StringBuilder();

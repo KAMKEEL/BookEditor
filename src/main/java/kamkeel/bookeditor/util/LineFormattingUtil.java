@@ -12,6 +12,7 @@ import java.util.List;
  * data object lightweight and makes testing easier.
  */
 public final class LineFormattingUtil {
+    private static final char SPLIT_CHAR = '\u00b7';
     public static final int BOOK_TEXT_WIDTH = 116;
 
     private static volatile BookFormatter formatter = new StandaloneBookFormatter();
@@ -88,12 +89,22 @@ public final class LineFormattingUtil {
         if (str == null) {
             return Arrays.asList("");
         }
-        return Arrays.asList(wrapStringToWidth(str, BOOK_TEXT_WIDTH, wrappedFormatting).split("\u00b7"));
+        return Arrays.asList(wrapStringToWidth(str, BOOK_TEXT_WIDTH, wrappedFormatting).split(String.valueOf(SPLIT_CHAR)));
     }
 
     public static String wrapStringToWidth(String strIn, int maxWidth, String wrappedFormatting) {
         if (strIn == null) {
             return "";
+        }
+        if (strIn.isEmpty()) {
+            return "";
+        }
+        int newlineIndex = strIn.indexOf('\n');
+        if (newlineIndex >= 0) {
+            String firstSegment = strIn.substring(0, newlineIndex + 1);
+            String remainder = strIn.substring(newlineIndex + 1);
+            String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
+            return firstSegment + SPLIT_CHAR + wrapStringToWidth(remainder, maxWidth, formatting);
         }
         int maxCharsInWidth = sizeStringToWidth(wrappedFormatting + strIn, maxWidth) - wrappedFormatting.length();
         if (maxCharsInWidth <= 0) {
@@ -110,7 +121,7 @@ public final class LineFormattingUtil {
             firstSegment = firstSegment + splitChar;
         }
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
-        return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
+        return firstSegment + SPLIT_CHAR + wrapStringToWidth(remainder, maxWidth, formatting);
     }
 
     public static String getActiveFormatting(String s) {

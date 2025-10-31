@@ -5,6 +5,8 @@ package kamkeel.bookeditor.book;
  * behaviours avoids duplicating logic across different parts of the editor.
  */
 public final class PageTextUtil {
+    public static final int MAX_LINES = 13;
+
     private PageTextUtil() {
     }
 
@@ -13,7 +15,7 @@ public final class PageTextUtil {
         if (Line.getStringWidth(lastLine.wrappedFormatting + lastLine.text) < Line.BOOK_TEXT_WIDTH) {
             lastLine.text += "\n";
         }
-        while (page.lines.size() < 13) {
+        while (page.lines.size() < MAX_LINES) {
             Line newLine = new Line();
             newLine.text = "\n";
             page.lines.add(newLine);
