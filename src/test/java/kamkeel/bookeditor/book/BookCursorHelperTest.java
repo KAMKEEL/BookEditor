@@ -1,18 +1,43 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.format.FormatterTestScenario;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
+@RunWith(Parameterized.class)
 public class BookCursorHelperTest {
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> parameters() {
+        return FormatterTestScenario.scenarios();
+    }
+
+    @Parameterized.Parameter(0)
+    public String name;
+
+    @Parameterized.Parameter(1)
+    public FormatterTestScenario scenario;
 
     @Before
     public void setUpMetrics() {
+        scenario.apply();
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+    }
+
+    @After
+    public void tearDown() {
+        scenario.reset();
     }
 
     private Book createTwoLineBook() {
@@ -57,6 +82,20 @@ public class BookCursorHelperTest {
         book.cursorPage = 1;
         book.cursorLine = 0;
         book.cursorPosChars = 5;
+        return book;
+    }
+
+    private Book createSingleLineBook(String text) {
+        Book book = new Book();
+        Page page = new Page();
+        page.lines.clear();
+        Line line = new Line();
+        line.text = text;
+        page.lines.add(line);
+        book.pages.add(page);
+        book.cursorPage = 0;
+        book.cursorLine = 0;
+        book.cursorPosChars = 0;
         return book;
     }
 
@@ -132,6 +171,36 @@ public class BookCursorHelperTest {
     }
 
     @Test
+    public void movingCursorRightSkipsAmpersandCodesWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createTwoLineBook();
+        Line formatted = new Line();
+        formatted.text = "&aB";
+        book.pages.get(0).lines.set(1, formatted);
+        book.cursorLine = 1;
+        book.cursorPosChars = 0;
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
+
+        assertThat(book.cursorPosChars, is(formatted.text.length()));
+    }
+
+    @Test
+    public void movingCursorRightTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createTwoLineBook();
+        Line formatted = new Line();
+        formatted.text = "&aB";
+        book.pages.get(0).lines.set(1, formatted);
+        book.cursorLine = 1;
+        book.cursorPosChars = 0;
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
+
+        assertThat(book.cursorPosChars, is(1));
+    }
+
+    @Test
     public void movingCursorLeftSkipsFormattingCodes() {
         Book book = createTwoLineBook();
         Line formatted = new Line();
@@ -158,5 +227,104 @@ public class BookCursorHelperTest {
 
         assertThat(book.cursorLine, is(1));
         assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void clickingAtLineStartPositionsBeforeFormatting() {
+        Book book = createSingleLineBook("\u00a7aAB");
+
+        BookCursorHelper.placeCursorFromClick(book, 0, 0);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void clickingAfterVisibleCharacterSkipsFormatting() {
+        Book book = createSingleLineBook("\u00a7aAB");
+        int charWidth = LineFormattingUtil.getMetrics().charWidth('A');
+
+        BookCursorHelper.placeCursorFromClick(book, 0, charWidth);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(3));
+    }
+
+    @Test
+    public void clickingBeyondLineWidthMovesToLineEnd() {
+        Book book = createSingleLineBook("Line");
+
+        BookCursorHelper.placeCursorFromClick(book, 0, 1_000);
+
+        Line line = book.pages.get(0).lines.get(0);
+        assertThat(book.cursorPosChars, is(line.text.length()));
+    }
+
+    @Test
+    public void clickingNegativeOffsetClampsToLineStart() {
+        Book book = createSingleLineBook("Example");
+
+        BookCursorHelper.placeCursorFromClick(book, 0, -25);
+
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void clickingLineOutOfRangeClampsWithinPage() {
+        Book book = createTwoLineBook();
+
+        BookCursorHelper.placeCursorFromClick(book, 5, 0);
+
+        assertThat(book.cursorLine, is(book.pages.get(0).lines.size() - 1));
+    }
+
+    @Test
+    public void clickingOnBlankLineAfterMultipleNewlinesKeepsCursorOnTargetLine() {
+        Book book = new Book();
+        Page page = new Page();
+        page.lines.clear();
+        Line first = new Line();
+        first.text = "First\n";
+        Line blank = new Line();
+        blank.text = "";
+        Line third = new Line();
+        third.text = "";
+        Line tail = new Line();
+        tail.text = "Tail";
+        page.lines.add(first);
+        page.lines.add(blank);
+        page.lines.add(third);
+        page.lines.add(tail);
+        book.pages.add(page);
+        book.cursorPage = 0;
+        book.cursorLine = 0;
+        book.cursorPosChars = 0;
+
+        BookCursorHelper.placeCursorFromClick(book, 2, 0);
+
+        assertThat(book.cursorLine, is(2));
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void clickingSkipsAmpersandFormattingWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createSingleLineBook("&aB");
+        int charWidth = LineFormattingUtil.getMetrics().charWidth('B');
+
+        BookCursorHelper.placeCursorFromClick(book, 0, charWidth);
+
+        assertThat(book.cursorPosChars, is(3));
+    }
+
+    @Test
+    public void clickingTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createSingleLineBook("&aB");
+        int charWidth = LineFormattingUtil.getMetrics().charWidth('&');
+
+        BookCursorHelper.placeCursorFromClick(book, 0, charWidth);
+
+        assertThat(book.cursorPosChars, is(1));
     }
 }
