@@ -9,7 +9,7 @@ package kamkeel.bookeditor.gui;
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.Printer;
 import kamkeel.bookeditor.book.Book;
-import kamkeel.bookeditor.book.Line;
+import kamkeel.bookeditor.book.BookCursorHelper;
 import kamkeel.bookeditor.book.Page;
 import kamkeel.bookeditor.constants.Buttons;
 import kamkeel.bookeditor.util.BookItemUtil;
@@ -310,24 +310,8 @@ public class GuiBookEditor extends GuiScreen {
         int bookTextTop = 33;
         if (this.heldBookIsWritable && posX >= bookTextLeft && posX < bookTextLeft + 116 && posY >= bookTextTop && posY < bookTextTop + 116) {
             int rowGuess = (posY - bookTextTop) / 9;
-            Page currPage = this.book.pages.get(this.book.cursorPage);
-            if (rowGuess < 0) {
-                rowGuess = 0;
-            } else if (rowGuess > currPage.lines.size() - 1) {
-                rowGuess = currPage.lines.size() - 1;
-            }
-            this.book.cursorLine = rowGuess;
-            Line currLine = currPage.lines.get(this.book.cursorLine);
-            int xOffset = posX - bookTextLeft;
-            if (xOffset < 0)
-                xOffset = 0;
-            int colGuess = Line.sizeStringToApproxWidthBlind(currLine.getTextWithWrappedFormatting(), xOffset);
-            colGuess -= currLine.wrappedFormatting.length();
-            if (colGuess < 0)
-                colGuess = 0;
-            if (colGuess > 0 && currLine.text.charAt(colGuess - 1) == '\n')
-                colGuess--;
-            this.book.cursorPosChars = colGuess;
+            int xOffset = Math.max(0, posX - bookTextLeft);
+            BookCursorHelper.placeCursorAtPixel(this.book, rowGuess, xOffset);
         }
         super.mouseClicked(posX, posY, button);
     }
