@@ -1,6 +1,7 @@
 package kamkeel.bookeditor.book;
 
-import kamkeel.bookeditor.util.FormattingUtil;
+import kamkeel.bookeditor.BookController;
+import kamkeel.bookeditor.format.BookFormatter;
 
 /**
  * Utility methods containing the heavy text manipulation logic for {@link Book}.
@@ -13,6 +14,7 @@ public final class BookTextHelper {
 
     public static void removeChar(Book book, boolean nextChar) {
         Line currLine = book.pages.get(book.cursorPage).lines.get(book.cursorLine);
+        BookFormatter formatter = BookController.getFormatter();
 
         if (nextChar) {
             if (book.cursorPosChars < currLine.text.length()) {
@@ -20,7 +22,7 @@ public final class BookTextHelper {
                 boolean removedFormatting = false;
 
                 while (removeEnd < currLine.text.length()) {
-                    int codeLength = FormattingUtil.detectFormattingCodeLength(currLine.text, removeEnd);
+                    int codeLength = formatter.detectFormattingCodeLength(currLine.text, removeEnd);
                     if (codeLength > 1) {
                         removeEnd += codeLength;
                         removedFormatting = true;
@@ -60,7 +62,7 @@ public final class BookTextHelper {
                 boolean removedAny = false;
 
                 while (removeStart > 0) {
-                    int codeStart = FormattingUtil.findFormattingCodeStart(currLine.text, removeStart);
+                    int codeStart = formatter.findFormattingCodeStart(currLine.text, removeStart);
                     if (codeStart >= 0) {
                         removedAny = true;
                         removeStart = codeStart;
