@@ -11,7 +11,7 @@ import io.netty.buffer.Unpooled;
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.Printer;
 import kamkeel.bookeditor.util.BookItemUtil;
-import kamkeel.bookeditor.util.FormattingUtil;
+import kamkeel.bookeditor.BookController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.init.Items;
@@ -258,7 +258,7 @@ public class Book {
                     fh.saveBookToGHBFile(this);
                     break;
                 }
-                String pageText = FormattingUtil.sanitizeFormatting(page.asString());
+                String pageText = BookController.getFormatter().sanitizeFormatting(page.asString());
                 bookPages.appendTag((NBTBase) new NBTTagString(pageText));
             }
             if (bookObj.hasTagCompound()) {

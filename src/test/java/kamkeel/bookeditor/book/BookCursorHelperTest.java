@@ -1,18 +1,44 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.BookController;
+import kamkeel.bookeditor.format.BookFormatter;
+import kamkeel.bookeditor.format.FormatterTestHelper;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Collection;
+import java.util.function.Supplier;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@RunWith(Parameterized.class)
 public class BookCursorHelperTest {
+    private final Supplier<BookFormatter> formatterSupplier;
+
+    public BookCursorHelperTest(String name, Supplier<BookFormatter> formatterSupplier) {
+        this.formatterSupplier = formatterSupplier;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return FormatterTestHelper.allFormatterSuppliers();
+    }
 
     @Before
     public void setUpMetrics() {
+        BookController.setFormatterForTesting(formatterSupplier.get());
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+    }
+
+    @After
+    public void tearDownFormatter() {
+        BookController.resetFormatterForTesting();
     }
 
     private Book createTwoLineBook() {
