@@ -182,12 +182,12 @@ public final class BookTextHelper {
         }
         strAdd = currentText.substring(0, Math.min(charPos, currentText.length())) + strAdd
             + currentText.substring(Math.min(charPos, currentText.length()));
-        if (lineNum > 0) {
+        if (lineNum > 0 && charPos > 0) {
             currPage.lines.remove(lineNum);
             lineNum--;
             currLine = currPage.lines.get(lineNum);
             charPos = currLine.text.length();
-        } else if (pageNum > 0) {
+        } else if (pageNum > 0 && charPos > 0) {
             currPage.lines.remove(lineNum);
             pageNum--;
             currPage = book.pages.get(pageNum);
@@ -223,16 +223,41 @@ public final class BookTextHelper {
         }
         book.cursorPosChars = charsBeforeCursor;
         if (book.cursorPosChars > 0 && currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
-            if (book.cursorLine < currPage.lines.size() - 1) {
-                book.cursorLine++;
-                book.cursorPosChars = 0;
-            } else if (book.cursorPage < book.totalPages() - 1) {
-                book.cursorPage++;
-                book.cursorLine = 0;
-                book.cursorPosChars = 0;
-            } else {
-                book.cursorPosChars--;
-            }
+            advanceCursorPastNewline(book, currPage, currLine);
         }
     }
+
+    private static void advanceCursorPastNewline(Book book, Page currPage, Line currLine) {
+        if (book.cursorLine < currPage.lines.size() - 1) {
+            book.cursorLine++;
+            book.cursorPosChars = 0;
+            return;
+        }
+
+        if (book.cursorPage < book.totalPages() - 1) {
+            book.cursorPage++;
+            book.cursorLine = 0;
+            book.cursorPosChars = 0;
+            return;
+        }
+
+        if (currPage.lines.size() < MAX_LINES_PER_PAGE) {
+            Line newLine = new Line();
+            newLine.wrappedFormatting = currLine.getActiveFormatting();
+            currPage.lines.add(newLine);
+            book.cursorLine++;
+            book.cursorPosChars = 0;
+            return;
+        }
+
+        Page newPage = new Page();
+        Line firstLine = newPage.lines.get(0);
+        firstLine.wrappedFormatting = currLine.getActiveFormatting();
+        book.pages.add(newPage);
+        book.cursorPage = book.pages.size() - 1;
+        book.cursorLine = 0;
+        book.cursorPosChars = 0;
+    }
+
+    private static final int MAX_LINES_PER_PAGE = 13;
 }

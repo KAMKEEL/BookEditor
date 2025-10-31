@@ -8,6 +8,7 @@ package kamkeel.bookeditor.book;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import kamkeel.bookeditor.BookController;
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.Printer;
 import kamkeel.bookeditor.util.BookItemUtil;
@@ -332,6 +333,6 @@ public class Book {
     }
 
     public static String removeFormatting(String strIn) {
-        return strIn.replaceAll("\u00a7[0-9a-fA-Fk-oK-OrR]?", "");
+        return BookController.getFormatter().stripColorCodes(strIn);
     }
 }
