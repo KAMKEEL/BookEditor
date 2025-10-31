@@ -1,20 +1,44 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.format.FormatterTestScenario;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
+@RunWith(Parameterized.class)
 public class BookTextHelperTest {
 
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> parameters() {
+        return FormatterTestScenario.scenarios();
+    }
+
+    @Parameterized.Parameter(0)
+    public String name;
+
+    @Parameterized.Parameter(1)
+    public FormatterTestScenario scenario;
+
     @Before
-    public void setUpMetrics() {
+    public void setUp() {
+        scenario.apply();
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+    }
+
+    @After
+    public void tearDown() {
+        scenario.reset();
     }
 
     private Book createBookWithSingleLine(String text) {
@@ -59,6 +83,28 @@ public class BookTextHelperTest {
         book.removeChar(true);
 
         assertThat(book.pages.get(0).lines.get(0).text, is("Color"));
+    }
+
+    @Test
+    public void removeCharDeletesAmpersandFormattingWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createBookWithSingleLine("&aColor");
+        book.cursorPosChars = 0;
+
+        book.removeChar(true);
+
+        assertThat(book.pages.get(0).lines.get(0).text, is("Color"));
+    }
+
+    @Test
+    public void removeCharTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createBookWithSingleLine("&aColor");
+        book.cursorPosChars = 0;
+
+        book.removeChar(true);
+
+        assertThat(book.pages.get(0).lines.get(0).text, is("aColor"));
     }
 
     @Test
@@ -184,5 +230,81 @@ public class BookTextHelperTest {
         book.addTextAtCursor("ful");
 
         assertThat(book.pages.get(0).lines.get(0).text, is("\u00a7aColorful"));
+    }
+
+    @Test
+    public void addTextAtCursorDoubleNewlineMovesCursorForward() {
+        Book book = createBook(createPage(""));
+
+        book.addTextAtCursor("\n");
+
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(0));
+        assertThat(book.pages.get(0).lines.size() >= 2, is(true));
+
+        book.addTextAtCursor("\n");
+
+        assertThat(book.cursorLine, is(2));
+        assertThat(book.cursorPosChars, is(0));
+        assertThat(book.pages.get(0).lines.size() >= 3, is(true));
+    }
+
+    @Test
+    public void addTextAtCursorNewlineAtFullPageCreatesNewPage() {
+        Page page = new Page();
+        page.lines.clear();
+        for (int i = 0; i < 12; i++) {
+            Line line = new Line();
+            line.text = "Line" + i + "\n";
+            page.lines.add(line);
+        }
+        Line last = new Line();
+        last.text = "";
+        page.lines.add(last);
+
+        Book book = createBook(page);
+        book.cursorPage = 0;
+        book.cursorLine = page.lines.size() - 1;
+        book.cursorPosChars = 0;
+
+        book.addTextAtCursor("\n");
+
+        assertThat(book.cursorPage, is(1));
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(0));
+        assertThat(book.pages.size(), is(2));
+    }
+
+    @Test
+    public void addTextAtCursorNewlineSplitsLineAtCursor() {
+        Page page = createPage("HelloWorld");
+        Book book = createBook(page);
+        book.cursorLine = 0;
+        book.cursorPosChars = 5;
+
+        book.addTextAtCursor("\n");
+
+        Line first = book.pages.get(0).lines.get(0);
+        Line second = book.pages.get(0).lines.get(1);
+        assertThat(first.text, is("Hello\n"));
+        assertThat(second.text, is("World"));
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void addTextAtCursorNewlineAtLineStartCreatesBlankLineAbove() {
+        Page page = createPage("Intro\n", "Body");
+        Book book = createBook(page);
+        book.cursorLine = 1;
+        book.cursorPosChars = 0;
+
+        book.addTextAtCursor("\n");
+
+        assertThat(book.pages.get(0).lines.size(), is(3));
+        assertThat(book.pages.get(0).lines.get(1).text, is("\n"));
+        assertThat(book.pages.get(0).lines.get(2).text, is("Body"));
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(0));
     }
 }

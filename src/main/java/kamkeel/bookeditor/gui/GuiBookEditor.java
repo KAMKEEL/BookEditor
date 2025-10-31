@@ -9,6 +9,7 @@ package kamkeel.bookeditor.gui;
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.Printer;
 import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.book.BookCursorHelper;
 import kamkeel.bookeditor.book.Line;
 import kamkeel.bookeditor.book.Page;
 import kamkeel.bookeditor.constants.Buttons;
@@ -316,18 +317,8 @@ public class GuiBookEditor extends GuiScreen {
             } else if (rowGuess > currPage.lines.size() - 1) {
                 rowGuess = currPage.lines.size() - 1;
             }
-            this.book.cursorLine = rowGuess;
-            Line currLine = currPage.lines.get(this.book.cursorLine);
             int xOffset = posX - bookTextLeft;
-            if (xOffset < 0)
-                xOffset = 0;
-            int colGuess = Line.sizeStringToApproxWidthBlind(currLine.getTextWithWrappedFormatting(), xOffset);
-            colGuess -= currLine.wrappedFormatting.length();
-            if (colGuess < 0)
-                colGuess = 0;
-            if (colGuess > 0 && currLine.text.charAt(colGuess - 1) == '\n')
-                colGuess--;
-            this.book.cursorPosChars = colGuess;
+            BookCursorHelper.placeCursorFromPixel(this.book, rowGuess, xOffset);
         }
         super.mouseClicked(posX, posY, button);
     }

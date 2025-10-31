@@ -18,23 +18,52 @@ public class SimpleTextMetrics implements TextMetrics {
 
     @Override
     public int stringWidth(String text) {
-        return text == null ? 0 : text.length() * charWidth;
+        if (text == null) {
+            return 0;
+        }
+        int width = 0;
+        for (int i = 0; i < text.length();) {
+            int codeLength = FormattingUtil.detectFormattingCodeLength(text, i);
+            if (codeLength > 0) {
+                i += codeLength;
+                continue;
+            }
+            width += charWidth;
+            i++;
+        }
+        return width;
     }
 
     @Override
     public int charWidth(char character) {
+        if (character == '\u00a7') {
+            return 0;
+        }
         return charWidth;
     }
 
     @Override
     public int sizeStringToWidth(String text, int maxWidth) {
-        if (text == null) {
+        if (text == null || maxWidth <= 0) {
             return 0;
         }
-        if (maxWidth <= 0) {
-            return 0;
+
+        int width = 0;
+        int index = 0;
+        while (index < text.length()) {
+            int codeLength = FormattingUtil.detectFormattingCodeLength(text, index);
+            if (codeLength > 0) {
+                index += codeLength;
+                continue;
+            }
+
+            width += charWidth;
+            if (width > maxWidth) {
+                break;
+            }
+            index++;
         }
-        int maxChars = maxWidth / charWidth;
-        return Math.min(text.length(), Math.max(0, maxChars));
+
+        return index;
     }
 }
