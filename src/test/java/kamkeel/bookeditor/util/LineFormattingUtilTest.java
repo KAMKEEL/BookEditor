@@ -1,6 +1,8 @@
 package kamkeel.bookeditor.util;
 
 import kamkeel.bookeditor.book.Line;
+import kamkeel.bookeditor.controller.BookController;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,7 +14,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class LineFormattingUtilTest {
 
     @Before
-    public void setUpMetrics() {
+    public void setUp() {
+        BookController.setFormatterForTesting(StandaloneBookFormatter.INSTANCE);
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
     }
 
