@@ -8,6 +8,7 @@ package kamkeel.bookeditor;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import kamkeel.bookeditor.book.Book;
@@ -46,6 +47,11 @@ public class BookEditor {
         MinecraftForge.EVENT_BUS.register(this);
         this.bookClipboard = new Book();
         this.pageClipboard = new ArrayList<String>();
+    }
+
+    @Mod.EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        BookController.preInit();
     }
 
     @SubscribeEvent
