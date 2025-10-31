@@ -34,15 +34,8 @@ public final class BookCursorHelper {
                 int cursorPosCharsUp = LineFormattingUtil.sizeStringToApproxWidthBlind(
                     currLine.getTextWithWrappedFormatting(), cursorPosPx
                 );
-                book.cursorPosChars = Math.max(cursorPosCharsUp - currLine.wrappedFormatting.length(), 0);
-
-                if (book.cursorPosChars > 0 && book.cursorPosChars <= currLine.text.length()) {
-                    if (currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
-                        book.cursorPosChars--;
-                    }
-                }
-
-                book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
+                int candidate = Math.max(cursorPosCharsUp - currLine.wrappedFormatting.length(), 0);
+                book.cursorPosChars = normalizeColumn(currLine, candidate);
                 return;
             case DOWN:
                 if (book.cursorLine == currPage.lines.size() - 1) {
@@ -62,15 +55,8 @@ public final class BookCursorHelper {
                 int cursorPosCharsDown = LineFormattingUtil.sizeStringToApproxWidthBlind(
                     currLine.getTextWithWrappedFormatting(), cursorPosPx
                 );
-                book.cursorPosChars = Math.max(cursorPosCharsDown - currLine.wrappedFormatting.length(), 0);
-
-                if (book.cursorPosChars > 0 && book.cursorPosChars <= currLine.text.length()) {
-                    if (currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
-                        book.cursorPosChars--;
-                    }
-                }
-
-                book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
+                int downCandidate = Math.max(cursorPosCharsDown - currLine.wrappedFormatting.length(), 0);
+                book.cursorPosChars = normalizeColumn(currLine, downCandidate);
                 return;
             case LEFT:
                 if (book.cursorPosChars > 0) {
@@ -85,6 +71,7 @@ public final class BookCursorHelper {
                                 && currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
                                 book.cursorPosChars--;
                             }
+                            book.cursorPosChars = normalizeColumn(currLine, book.cursorPosChars);
                         }
                     }
                 } else {
@@ -96,6 +83,7 @@ public final class BookCursorHelper {
                             && currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
                             book.cursorPosChars--;
                         }
+                        book.cursorPosChars = normalizeColumn(currLine, book.cursorPosChars);
                     }
                 }
                 return;
@@ -113,6 +101,7 @@ public final class BookCursorHelper {
                         if (!currLine.text.isEmpty() && currLine.text.charAt(0) == '\n') {
                             book.cursorPosChars = Math.min(1, currLine.text.length());
                         }
+                        book.cursorPosChars = skipFormattingForward(currLine.text, book.cursorPosChars);
                     } else if (book.cursorPage < book.totalPages() - 1) {
                         book.cursorPage++;
                         book.cursorLine = 0;
@@ -122,9 +111,69 @@ public final class BookCursorHelper {
                         if (!currLine.text.isEmpty() && currLine.text.charAt(0) == '\n') {
                             book.cursorPosChars = Math.min(1, currLine.text.length());
                         }
+                        book.cursorPosChars = skipFormattingForward(currLine.text, book.cursorPosChars);
                     }
                 }
         }
+    }
+
+    public static void placeCursorAtPixel(Book book, int rawLineIndex, int pixelOffset) {
+        if (book.pages.isEmpty()) {
+            book.cursorLine = 0;
+            book.cursorPosChars = 0;
+            return;
+        }
+        Page currPage = book.pages.get(book.cursorPage);
+        int clampedLine = clampLineIndex(currPage, rawLineIndex);
+        Line currLine = currPage.lines.get(clampedLine);
+        int safeOffset = Math.max(0, pixelOffset);
+        int charGuess = LineFormattingUtil.sizeStringToApproxWidthBlind(
+            currLine.getTextWithWrappedFormatting(), safeOffset
+        );
+        charGuess -= currLine.wrappedFormatting.length();
+        placeCursor(book, clampedLine, charGuess);
+    }
+
+    public static void placeCursor(Book book, int rawLineIndex, int rawCharIndex) {
+        if (book.pages.isEmpty()) {
+            book.cursorLine = 0;
+            book.cursorPosChars = 0;
+            return;
+        }
+        Page currPage = book.pages.get(book.cursorPage);
+        int clampedLine = clampLineIndex(currPage, rawLineIndex);
+        Line currLine = currPage.lines.get(clampedLine);
+        int normalized = normalizeColumn(currLine, rawCharIndex);
+        book.cursorLine = clampedLine;
+        book.cursorPosChars = normalized;
+    }
+
+    private static int clampLineIndex(Page currPage, int rawLineIndex) {
+        if (currPage.lines.isEmpty()) {
+            return 0;
+        }
+        if (rawLineIndex < 0) {
+            return 0;
+        }
+        if (rawLineIndex >= currPage.lines.size()) {
+            return currPage.lines.size() - 1;
+        }
+        return rawLineIndex;
+    }
+
+    private static int normalizeColumn(Line line, int candidate) {
+        CharSequence text = line.text;
+        int length = text.length();
+        int pos = Math.max(0, Math.min(candidate, length));
+        pos = skipFormattingBackward(text, pos);
+        int codeLength = FormattingUtil.detectFormattingCodeLength(text, pos);
+        if (codeLength > 0) {
+            pos = Math.min(pos + codeLength, length);
+        }
+        if (pos > 0 && pos <= length && text.charAt(pos - 1) == '\n') {
+            pos--;
+        }
+        return Math.max(0, Math.min(pos, length));
     }
 
     private static int skipFormattingBackward(CharSequence text, int position) {

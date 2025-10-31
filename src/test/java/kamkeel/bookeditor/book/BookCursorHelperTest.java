@@ -57,6 +57,22 @@ public class BookCursorHelperTest {
         return book;
     }
 
+    private Book createBookWithLines(String... lines) {
+        Book book = new Book();
+        Page page = new Page();
+        page.lines.clear();
+        for (String text : lines) {
+            Line line = new Line();
+            line.text = text;
+            page.lines.add(line);
+        }
+        book.pages.add(page);
+        book.cursorPage = 0;
+        book.cursorLine = 0;
+        book.cursorPosChars = 0;
+        return book;
+    }
+
     private Book createMultiPageBook() {
         Book book = new Book();
         Page firstPage = new Page();
@@ -213,5 +229,155 @@ public class BookCursorHelperTest {
 
         assertThat(book.cursorLine, is(1));
         assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void placingCursorClampsLineAndColumn() {
+        Book book = createBookWithLines("First", "", "Third");
+
+        BookCursorHelper.placeCursor(book, 5, 10);
+
+        assertThat(book.cursorLine, is(2));
+        assertThat(book.cursorPosChars, is(5));
+
+        BookCursorHelper.placeCursorAtPixel(book, -3, -20);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void placingCursorSkipsFormattingCodes() {
+        Book book = createBookWithLines("\u00a7aColor");
+
+        BookCursorHelper.placeCursor(book, 0, 1);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(2));
+    }
+
+    @Test
+    public void placingCursorSkipsAmpersandCodesWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createBookWithLines("&aColor");
+
+        BookCursorHelper.placeCursor(book, 0, 1);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(2));
+    }
+
+    @Test
+    public void placingCursorTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createBookWithLines("&aColor");
+
+        BookCursorHelper.placeCursor(book, 0, 1);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(1));
+    }
+
+    @Test
+    public void placingCursorStopsBeforeTrailingNewline() {
+        Book book = createBookWithLines("Hello\n");
+
+        BookCursorHelper.placeCursor(book, 0, 100);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(5));
+    }
+
+    @Test
+    public void placingCursorAtPixelClampsOffset() {
+        Book book = createBookWithLines("Hello");
+        Line line = book.pages.get(0).lines.get(0);
+        int beyondWidth = LineFormattingUtil.getStringWidth(line.getTextWithWrappedFormatting()) + 60;
+
+        BookCursorHelper.placeCursorAtPixel(book, 10, beyondWidth);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(line.text.length()));
+
+        BookCursorHelper.placeCursorAtPixel(book, -5, -10);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void movingCursorUpSkipsFormattingCodesInDestination() {
+        Book book = createBookWithLines("\u00a7aB", "C");
+        book.cursorLine = 1;
+        book.cursorPosChars = 1;
+
+        book.moveCursor(Book.CursorDirection.UP);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(2));
+    }
+
+    @Test
+    public void movingCursorUpSkipsAmpersandCodesWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createBookWithLines("&aB", "C");
+        book.cursorLine = 1;
+        book.cursorPosChars = 1;
+
+        book.moveCursor(Book.CursorDirection.UP);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(2));
+    }
+
+    @Test
+    public void movingCursorUpTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createBookWithLines("&aB", "C");
+        book.cursorLine = 1;
+        book.cursorPosChars = 1;
+
+        book.moveCursor(Book.CursorDirection.UP);
+
+        assertThat(book.cursorLine, is(0));
+        assertThat(book.cursorPosChars, is(1));
+    }
+
+    @Test
+    public void movingCursorDownSkipsFormattingCodesInDestination() {
+        Book book = createBookWithLines("C", "\u00a7aB");
+        book.cursorLine = 0;
+        book.cursorPosChars = 1;
+
+        book.moveCursor(Book.CursorDirection.DOWN);
+
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(2));
+    }
+
+    @Test
+    public void movingCursorDownSkipsAmpersandCodesWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createBookWithLines("C", "&aB");
+        book.cursorLine = 0;
+        book.cursorPosChars = 1;
+
+        book.moveCursor(Book.CursorDirection.DOWN);
+
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(2));
+    }
+
+    @Test
+    public void movingCursorDownTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createBookWithLines("C", "&aB");
+        book.cursorLine = 0;
+        book.cursorPosChars = 1;
+
+        book.moveCursor(Book.CursorDirection.DOWN);
+
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(1));
     }
 }

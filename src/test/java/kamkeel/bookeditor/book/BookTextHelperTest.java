@@ -274,4 +274,24 @@ public class BookTextHelperTest {
         assertThat(book.cursorPosChars, is(0));
         assertThat(book.pages.size(), is(2));
     }
+
+    @Test
+    public void addTextAtCursorNewlineCarriesActiveFormatting() {
+        Line formatted = new Line();
+        formatted.text = "\u00a7aColor";
+        Page page = new Page();
+        page.lines.clear();
+        page.lines.add(formatted);
+        Book book = createBook(page);
+        book.cursorPosChars = formatted.text.length();
+        String expectedFormatting = formatted.getActiveFormatting();
+
+        book.addTextAtCursor("\n");
+
+        Page currentPage = book.pages.get(0);
+        assertThat(currentPage.lines.size() >= 2, is(true));
+        assertThat(currentPage.lines.get(1).wrappedFormatting, is(expectedFormatting));
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(0));
+    }
 }
