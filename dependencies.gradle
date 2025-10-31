@@ -39,7 +39,6 @@ dependencies {
 
     testImplementation rfg.deobf(name: "hextext-1.0")
     compileOnly rfg.deobf(name: "hextext-1.0")
-    runtimeOnlyNonPublishable rfg.deobf(name: "hextext-1.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.hamcrest:hamcrest:2.2")

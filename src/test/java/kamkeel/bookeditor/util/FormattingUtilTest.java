@@ -1,11 +1,19 @@
 package kamkeel.bookeditor.util;
 
+import kamkeel.bookeditor.controller.BookController;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FormattingUtilTest {
+
+    @Before
+    public void setUpFormatter() {
+        BookController.setFormatterForTesting(StandaloneBookFormatter.INSTANCE);
+    }
 
     @Test
     public void detectFormattingCodeLengthHandlesValidCodes() {
