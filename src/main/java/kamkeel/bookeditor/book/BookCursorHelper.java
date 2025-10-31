@@ -1,5 +1,6 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.util.FormattingUtil;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 
 /**
@@ -41,10 +42,7 @@ public final class BookCursorHelper {
                     }
                 }
 
-                while (book.cursorPosChars > 0
-                    && currLine.text.charAt(book.cursorPosChars - 1) == '\u00a7') {
-                    book.cursorPosChars = Math.max(book.cursorPosChars - 2, 0);
-                }
+                book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
                 return;
             case DOWN:
                 if (book.cursorLine == currPage.lines.size() - 1) {
@@ -72,18 +70,12 @@ public final class BookCursorHelper {
                     }
                 }
 
-                while (book.cursorPosChars > 0
-                    && currLine.text.charAt(book.cursorPosChars - 1) == '\u00a7') {
-                    book.cursorPosChars = Math.max(book.cursorPosChars - 2, 0);
-                }
+                book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
                 return;
             case LEFT:
                 if (book.cursorPosChars > 0) {
                     book.cursorPosChars--;
-                    while (book.cursorPosChars > 0
-                        && currLine.text.charAt(book.cursorPosChars - 1) == '\u00a7') {
-                        book.cursorPosChars = Math.max(book.cursorPosChars - 2, 0);
-                    }
+                    book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
                     if (book.cursorPosChars == 0) {
                         if (book.cursorLine > 0) {
                             book.cursorLine--;
@@ -93,6 +85,7 @@ public final class BookCursorHelper {
                                 && currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
                                 book.cursorPosChars--;
                             }
+                            book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
                         }
                     }
                 } else {
@@ -104,6 +97,7 @@ public final class BookCursorHelper {
                             && currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
                             book.cursorPosChars--;
                         }
+                        book.cursorPosChars = skipFormattingBackward(currLine.text, book.cursorPosChars);
                     }
                 }
                 return;
@@ -112,14 +106,7 @@ public final class BookCursorHelper {
                 if (book.cursorPosChars < currLineLength
                     && currLine.text.charAt(book.cursorPosChars) != '\n') {
                     book.cursorPosChars++;
-
-                    while (book.cursorPosChars < currLineLength
-                        && currLine.text.charAt(book.cursorPosChars - 1) == '\u00a7') {
-                        book.cursorPosChars += 1;
-                        if (book.cursorPosChars < currLineLength) {
-                            book.cursorPosChars++;
-                        }
-                    }
+                    book.cursorPosChars = skipFormattingForward(currLine.text, book.cursorPosChars);
                 } else {
                     if (book.cursorLine < currPage.lines.size() - 1) {
                         book.cursorLine++;
@@ -140,5 +127,49 @@ public final class BookCursorHelper {
                     }
                 }
         }
+    }
+
+    private static int skipFormattingBackward(String text, int cursorPos) {
+        if (text == null) {
+            return cursorPos;
+        }
+        int pos = cursorPos;
+        while (pos > 0) {
+            int start = pos - 1;
+            int length = FormattingUtil.detectFormattingCodeLength(text, start);
+            if (length <= 0) {
+                break;
+            }
+            pos = Math.max(start, 0);
+        }
+        return pos;
+    }
+
+    private static int skipFormattingForward(String text, int cursorPos) {
+        if (text == null) {
+            return cursorPos;
+        }
+        int pos = cursorPos;
+        while (pos > 0 && pos <= text.length()) {
+            int start = pos - 1;
+            if (start < 0) {
+                break;
+            }
+            int length = FormattingUtil.detectFormattingCodeLength(text, start);
+            if (length <= 0) {
+                break;
+            }
+            if (length < 2) {
+                pos = Math.min(start + length, text.length());
+                break;
+            }
+            pos = Math.min(start + length, text.length());
+            if (pos < text.length()) {
+                pos++;
+            } else {
+                break;
+            }
+        }
+        return pos;
     }
 }

@@ -1,18 +1,52 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.BookController;
+import kamkeel.bookeditor.format.BookFormatter;
+import kamkeel.bookeditor.format.HexTextBookFormatter;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@RunWith(Parameterized.class)
 public class BookCursorHelperTest {
 
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+            {"Standalone", new StandaloneBookFormatter(), false},
+            {"HexText (ampersand off)", new HexTextBookFormatter(() -> false, () -> true), false},
+            {"HexText (ampersand on)", new HexTextBookFormatter(() -> true, () -> true), true}
+        });
+    }
+
+    private final BookFormatter formatter;
+    private final boolean ampersandEnabled;
+
+    public BookCursorHelperTest(String name, BookFormatter formatter, boolean ampersandEnabled) {
+        this.formatter = formatter;
+        this.ampersandEnabled = ampersandEnabled;
+    }
+
     @Before
-    public void setUpMetrics() {
+    public void setUp() {
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+        BookController.setFormatter(formatter);
+    }
+
+    @After
+    public void tearDown() {
+        BookController.setFormatter(new StandaloneBookFormatter());
     }
 
     private Book createTwoLineBook() {
@@ -129,6 +163,24 @@ public class BookCursorHelperTest {
         book.moveCursor(Book.CursorDirection.RIGHT);
 
         assertThat(book.cursorPosChars, is(formatted.text.length()));
+    }
+
+    @Test
+    public void movingCursorRightSkipsAmpersandCodesWhenEnabled() {
+        Book book = createTwoLineBook();
+        Line formatted = new Line();
+        formatted.text = "&aB";
+        book.pages.get(0).lines.set(1, formatted);
+        book.cursorLine = 1;
+        book.cursorPosChars = 0;
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
+
+        if (ampersandEnabled) {
+            assertThat(book.cursorPosChars, is(formatted.text.length()));
+        } else {
+            assertThat(book.cursorPosChars, is(1));
+        }
     }
 
     @Test

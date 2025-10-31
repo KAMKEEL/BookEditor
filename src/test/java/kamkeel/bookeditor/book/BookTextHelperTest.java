@@ -1,20 +1,53 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.BookController;
+import kamkeel.bookeditor.format.BookFormatter;
+import kamkeel.bookeditor.format.HexTextBookFormatter;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@RunWith(Parameterized.class)
 public class BookTextHelperTest {
 
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+            {"Standalone", new StandaloneBookFormatter(), false},
+            {"HexText (ampersand off)", new HexTextBookFormatter(() -> false, () -> true), false},
+            {"HexText (ampersand on)", new HexTextBookFormatter(() -> true, () -> true), true}
+        });
+    }
+
+    private final BookFormatter formatter;
+    private final boolean ampersandEnabled;
+
+    public BookTextHelperTest(String name, BookFormatter formatter, boolean ampersandEnabled) {
+        this.formatter = formatter;
+        this.ampersandEnabled = ampersandEnabled;
+    }
+
     @Before
-    public void setUpMetrics() {
+    public void setUp() {
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+        BookController.setFormatter(formatter);
+    }
+
+    @After
+    public void tearDown() {
+        BookController.setFormatter(new StandaloneBookFormatter());
     }
 
     private Book createBookWithSingleLine(String text) {
@@ -59,6 +92,20 @@ public class BookTextHelperTest {
         book.removeChar(true);
 
         assertThat(book.pages.get(0).lines.get(0).text, is("Color"));
+    }
+
+    @Test
+    public void removeCharHandlesAmpersandRespectingConfig() {
+        Book book = createBookWithSingleLine("&aColor");
+        book.cursorPosChars = 0;
+
+        book.removeChar(true);
+
+        if (ampersandEnabled) {
+            assertThat(book.pages.get(0).lines.get(0).text, is("Color"));
+        } else {
+            assertThat(book.pages.get(0).lines.get(0).text, is("aColor"));
+        }
     }
 
     @Test
