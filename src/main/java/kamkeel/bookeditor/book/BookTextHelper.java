@@ -216,23 +216,47 @@ public final class BookTextHelper {
         }
         book.cursorLine = 0;
         currLine = currPage.lines.get(book.cursorLine);
-        while (charsBeforeCursor > currLine.text.length()) {
-            charsBeforeCursor -= currLine.text.length();
-            book.cursorLine++;
-            currLine = currPage.lines.get(book.cursorLine);
-        }
-        book.cursorPosChars = charsBeforeCursor;
-        if (book.cursorPosChars > 0 && currLine.text.charAt(book.cursorPosChars - 1) == '\n') {
-            if (book.cursorLine < currPage.lines.size() - 1) {
-                book.cursorLine++;
-                book.cursorPosChars = 0;
-            } else if (book.cursorPage < book.totalPages() - 1) {
-                book.cursorPage++;
-                book.cursorLine = 0;
-                book.cursorPosChars = 0;
-            } else {
-                book.cursorPosChars--;
+
+        String pageText = currPage.asString();
+        int substringEnd = Math.min(charsBeforeCursor, pageText.length());
+        String uptoCursor = pageText.substring(0, substringEnd);
+        int newlineCount = 0;
+        int lastNewlineIndex = -1;
+        for (int i = 0; i < uptoCursor.length(); i++) {
+            if (uptoCursor.charAt(i) == '\n') {
+                newlineCount++;
+                lastNewlineIndex = i;
             }
         }
+
+        int targetLineIndex = newlineCount;
+        int targetPos = substringEnd;
+        if (lastNewlineIndex >= 0) {
+            targetPos = substringEnd - lastNewlineIndex - 1;
+        }
+
+        while (targetLineIndex >= currPage.lines.size()) {
+            if (currPage.lines.size() >= 13) {
+                Line previous = currPage.lines.get(currPage.lines.size() - 1);
+                Page newPage = new Page();
+                newPage.lines.clear();
+                Line firstLine = new Line();
+                firstLine.wrappedFormatting = previous.getActiveFormatting();
+                newPage.lines.add(firstLine);
+                book.pages.add(newPage);
+                book.cursorPage = book.pages.size() - 1;
+                book.cursorLine = 0;
+                book.cursorPosChars = 0;
+                return;
+            }
+            Line previous = currPage.lines.get(currPage.lines.size() - 1);
+            Line extra = new Line();
+            extra.wrappedFormatting = previous.getActiveFormatting();
+            currPage.lines.add(extra);
+        }
+
+        book.cursorLine = targetLineIndex;
+        currLine = currPage.lines.get(book.cursorLine);
+        book.cursorPosChars = Math.min(targetPos, currLine.text.length());
     }
 }
