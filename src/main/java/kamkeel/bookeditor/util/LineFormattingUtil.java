@@ -1,5 +1,8 @@
 package kamkeel.bookeditor.util;
 
+import kamkeel.bookeditor.format.BookFormatter;
+import kamkeel.bookeditor.format.StandaloneBookFormatter;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,9 +14,18 @@ import java.util.List;
 public final class LineFormattingUtil {
     public static final int BOOK_TEXT_WIDTH = 116;
 
+    private static volatile BookFormatter formatter = new StandaloneBookFormatter();
     private static volatile TextMetrics metrics = new MinecraftTextMetrics();
 
     private LineFormattingUtil() {
+    }
+
+    public static void setFormatter(BookFormatter newFormatter) {
+        formatter = newFormatter != null ? newFormatter : new StandaloneBookFormatter();
+    }
+
+    private static BookFormatter getFormatter() {
+        return formatter;
     }
 
     public static void setMetrics(TextMetrics newMetrics) {
@@ -83,6 +95,13 @@ public final class LineFormattingUtil {
         if (strIn == null) {
             return "";
         }
+        int newlineIndex = strIn.indexOf('\n');
+        if (newlineIndex >= 0 && newlineIndex < strIn.length() - 1) {
+            String firstSegment = strIn.substring(0, newlineIndex + 1);
+            String remainder = strIn.substring(newlineIndex + 1);
+            String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
+            return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
+        }
         int maxCharsInWidth = sizeStringToWidth(wrappedFormatting + strIn, maxWidth) - wrappedFormatting.length();
         if (maxCharsInWidth <= 0) {
             maxCharsInWidth = 1;
@@ -102,71 +121,19 @@ public final class LineFormattingUtil {
     }
 
     public static String getActiveFormatting(String s) {
-        if (s == null) {
-            return "";
-        }
-        String color = "";
-        boolean k = false, l = false, m = false, n = false, o = false;
-        for (int i = 0; i < s.length() - 1; i++) {
-            if (s.charAt(i) == '§') {
-                char c = Character.toLowerCase(s.charAt(i + 1));
-                if (c == 'r') {
-                    color = "";
-                    k = l = m = n = o = false;
-                } else if (isFormatColor(c)) {
-                    color = "§" + c;
-                    k = l = m = n = o = false;
-                } else if (c == 'k') {
-                    k = true;
-                } else if (c == 'l') {
-                    l = true;
-                } else if (c == 'm') {
-                    m = true;
-                } else if (c == 'n') {
-                    n = true;
-                } else if (c == 'o') {
-                    o = true;
-                }
-            }
-        }
-        StringBuilder out = new StringBuilder();
-        if (!color.isEmpty()) out.append(color);
-        if (k) out.append("§k");
-        if (l) out.append("§l");
-        if (m) out.append("§m");
-        if (n) out.append("§n");
-        if (o) out.append("§o");
-        return out.toString();
+        return getFormatter().getActiveFormatting(s);
     }
 
     public static String getFormatFromString(String str) {
-        if (str == null) {
-            return "";
-        }
-        String s1 = "";
-        int i = -1;
-        int j = str.length();
-        while ((i = str.indexOf('§', i + 1)) != -1) {
-            if (i < j - 1) {
-                char c0 = str.charAt(i + 1);
-                if (isFormatColor(c0)) {
-                    s1 = "§" + c0;
-                    continue;
-                }
-                if (isFormatSpecial(c0)) {
-                    s1 = s1 + "§" + c0;
-                }
-            }
-        }
-        return s1;
+        return getFormatter().getFormatFromString(str);
     }
 
     public static boolean isFormatSpecial(char par0) {
-        return ((par0 >= 'k' && par0 <= 'o') || (par0 >= 'K' && par0 <= 'O') || par0 == 'r' || par0 == 'R');
+        return getFormatter().isFormatSpecial(par0);
     }
 
     public static boolean isFormatColor(char par0) {
-        return ((par0 >= '0' && par0 <= '9') || (par0 >= 'a' && par0 <= 'f') || (par0 >= 'A' && par0 <= 'F'));
+        return getFormatter().isFormatColor(par0);
     }
 
     public static int getStringWidth(String strIn) {
