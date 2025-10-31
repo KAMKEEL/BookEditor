@@ -1,20 +1,44 @@
 package kamkeel.bookeditor.book;
 
+import kamkeel.bookeditor.format.FormatterTestScenario;
 import kamkeel.bookeditor.util.LineFormattingUtil;
 import kamkeel.bookeditor.util.SimpleTextMetrics;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
+@RunWith(Parameterized.class)
 public class BookTextHelperTest {
 
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> parameters() {
+        return FormatterTestScenario.scenarios();
+    }
+
+    @Parameterized.Parameter(0)
+    public String name;
+
+    @Parameterized.Parameter(1)
+    public FormatterTestScenario scenario;
+
     @Before
-    public void setUpMetrics() {
+    public void setUp() {
+        scenario.apply();
         LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+    }
+
+    @After
+    public void tearDown() {
+        scenario.reset();
     }
 
     private Book createBookWithSingleLine(String text) {
@@ -59,6 +83,28 @@ public class BookTextHelperTest {
         book.removeChar(true);
 
         assertThat(book.pages.get(0).lines.get(0).text, is("Color"));
+    }
+
+    @Test
+    public void removeCharDeletesAmpersandFormattingWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createBookWithSingleLine("&aColor");
+        book.cursorPosChars = 0;
+
+        book.removeChar(true);
+
+        assertThat(book.pages.get(0).lines.get(0).text, is("Color"));
+    }
+
+    @Test
+    public void removeCharTreatsAmpersandAsLiteralWhenDisabled() {
+        assumeTrue(scenario.isHexText() && !scenario.isAmpersandEnabled());
+        Book book = createBookWithSingleLine("&aColor");
+        book.cursorPosChars = 0;
+
+        book.removeChar(true);
+
+        assertThat(book.pages.get(0).lines.get(0).text, is("aColor"));
     }
 
     @Test
