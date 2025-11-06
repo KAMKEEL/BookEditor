@@ -9,6 +9,7 @@ package kamkeel.bookeditor.gui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import kamkeel.bookeditor.BookEditor;
 import kamkeel.bookeditor.FileHandler;
 import kamkeel.bookeditor.Printer;
 import kamkeel.bookeditor.book.Book;
@@ -28,7 +29,6 @@ import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import kamkeel.bookeditor.constants.Buttons;
-import kamkeel.bookeditor.book.format.FormattingOptions;
 import kamkeel.bookeditor.util.BookUtil;
 
 public class GuiBookEditor extends GuiScreen {
@@ -130,18 +130,6 @@ public class GuiBookEditor extends GuiScreen {
         this.book.cursorPosChars = 0;
     }
 
-    public int getColorButX(int buttonNum) {
-        int middle = this.width / 2;
-        int leftMost = middle - 160;
-        return leftMost + 20 * (buttonNum - 50);
-    }
-
-    public int getFormatButX(int buttonNum) {
-        int middle = this.width / 2;
-        int leftMost = middle - 100;
-        return leftMost + 20 * (buttonNum - 66);
-    }
-
     public void initGui() {
         Keyboard.enableRepeatEvents(true);
         int buttonWidth = 120;
@@ -149,7 +137,7 @@ public class GuiBookEditor extends GuiScreen {
         int buttonSideOffset = 5;
         ScaledResolution scaledResolution = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
         int rightXPos = scaledResolution.getScaledWidth() - buttonWidth + buttonSideOffset;
-        FormattingOptions formattingOptions = FormattingOptions.defaults();
+        boolean hexTextEnabled = BookEditor.HEX_TEXT_ENABLED;
 
         if (this.heldBookIsWritable) {
             this.buttonList.add(new GuiButton(Buttons.BTN_SIGN, 5, 95, buttonWidth, buttonHeight, "Sign"));
@@ -164,34 +152,65 @@ public class GuiBookEditor extends GuiScreen {
 
             int colorButY = this.height - 40;
             int formatButY = this.height - 20;
-            this.buttonList.add(this.btnBlack = new GuiButton(Buttons.BTN_BLACK, getColorButX(Buttons.BTN_BLACK), colorButY, 20, 20, "\u00a70A"));
-            this.buttonList.add(this.btnDarkBlue = new GuiButton(Buttons.BTN_DARK_BLUE, getColorButX(Buttons.BTN_DARK_BLUE), colorButY, 20, 20, "\u00a71A"));
-            this.buttonList.add(this.btnDarkGreen = new GuiButton(Buttons.BTN_DARK_GREEN, getColorButX(Buttons.BTN_DARK_GREEN), colorButY, 20, 20, "\u00a72A"));
-            this.buttonList.add(this.btnDarkAqua = new GuiButton(Buttons.BTN_DARK_AQUA, getColorButX(Buttons.BTN_DARK_AQUA), colorButY, 20, 20, "\u00a73A"));
-            this.buttonList.add(this.btnDarkRed = new GuiButton(Buttons.BTN_DARK_RED, getColorButX(Buttons.BTN_DARK_RED), colorButY, 20, 20, "\u00a74A"));
-            this.buttonList.add(this.btnDarkPurple = new GuiButton(Buttons.BTN_DARK_PURPLE, getColorButX(Buttons.BTN_DARK_PURPLE), colorButY, 20, 20, "\u00a75A"));
-            this.buttonList.add(this.btnGold = new GuiButton(Buttons.BTN_GOLD, getColorButX(Buttons.BTN_GOLD), colorButY, 20, 20, "\u00a76A"));
-            this.buttonList.add(this.btnGray = new GuiButton(Buttons.BTN_GRAY, getColorButX(Buttons.BTN_GRAY), colorButY, 20, 20, "\u00a77A"));
-            this.buttonList.add(this.btnDarkGray = new GuiButton(Buttons.BTN_DARK_GRAY, getColorButX(Buttons.BTN_DARK_GRAY), colorButY, 20, 20, "\u00a78A"));
-            this.buttonList.add(this.btnBlue = new GuiButton(Buttons.BTN_BLUE, getColorButX(Buttons.BTN_BLUE), colorButY, 20, 20, "\u00a79A"));
-            this.buttonList.add(this.btnGreen = new GuiButton(Buttons.BTN_GREEN, getColorButX(Buttons.BTN_GREEN), colorButY, 20, 20, "\u00a7aA"));
-            this.buttonList.add(this.btnAqua = new GuiButton(Buttons.BTN_AQUA, getColorButX(Buttons.BTN_AQUA), colorButY, 20, 20, "\u00a7bA"));
-            this.buttonList.add(this.btnRed = new GuiButton(Buttons.BTN_RED, getColorButX(Buttons.BTN_RED), colorButY, 20, 20, "\u00a7cA"));
-            this.buttonList.add(this.btnLightPurple = new GuiButton(Buttons.BTN_LIGHT_PURPLE, getColorButX(Buttons.BTN_LIGHT_PURPLE), colorButY, 20, 20, "\u00a7dA"));
-            this.buttonList.add(this.btnYellow = new GuiButton(Buttons.BTN_YELLOW, getColorButX(Buttons.BTN_YELLOW), colorButY, 20, 20, "\u00a7eA"));
-            this.buttonList.add(this.btnWhite = new GuiButton(Buttons.BTN_WHITE, getColorButX(Buttons.BTN_WHITE), colorButY, 20, 20, "\u00a7fA"));
-            this.buttonList.add(this.btnObfuscated = new GuiButton(Buttons.BTN_OBFUSCATED, getFormatButX(Buttons.BTN_OBFUSCATED), formatButY, 20, 20, "#"));
-            this.buttonList.add(this.btnBold = new GuiButton(Buttons.BTN_BOLD, getFormatButX(Buttons.BTN_BOLD), formatButY, 20, 20, "\u00a7lB"));
-            this.buttonList.add(this.btnStrikethrough = new GuiButton(Buttons.BTN_STRIKETHROUGH, getFormatButX(Buttons.BTN_STRIKETHROUGH), formatButY, 20, 20, "\u00a7mS"));
-            this.buttonList.add(this.btnUnderline = new GuiButton(Buttons.BTN_UNDERLINE, getFormatButX(Buttons.BTN_UNDERLINE), formatButY, 20, 20, "\u00a7nU"));
-            this.buttonList.add(this.btnItalic = new GuiButton(Buttons.BTN_ITALIC, getFormatButX(Buttons.BTN_ITALIC), formatButY, 20, 20, "\u00a7oI"));
-            this.buttonList.add(this.btnResetFormat = new GuiButton(Buttons.BTN_RESET_FORMAT, getFormatButX(Buttons.BTN_RESET_FORMAT), formatButY, 100, 20, "Reset Formatting"));
-            if (formattingOptions.hexSectionSupport()) {
-                this.buttonList.add(this.btnFormatG = new GuiButton(Buttons.BTN_FORMAT_G, getFormatButX(Buttons.BTN_FORMAT_G), formatButY, 20, 20, "\u00a7g"));
-                this.buttonList.add(this.btnFormatH = new GuiButton(Buttons.BTN_FORMAT_H, getFormatButX(Buttons.BTN_FORMAT_H), formatButY, 20, 20, "\u00a7h"));
-                this.buttonList.add(this.btnFormatI = new GuiButton(Buttons.BTN_FORMAT_I, getFormatButX(Buttons.BTN_FORMAT_I), formatButY, 20, 20, "\u00a7i"));
-                this.buttonList.add(this.btnFormatJ = new GuiButton(Buttons.BTN_FORMAT_J, getFormatButX(Buttons.BTN_FORMAT_J), formatButY, 20, 20, "\u00a7j"));
-                this.buttonList.add(this.btnHexColor = new GuiButton(Buttons.BTN_HEX_COLOR, getFormatButX(Buttons.BTN_HEX_COLOR), formatButY, 20, 20, "\u00a7#"));
+
+            List<GuiButton> colorButtons = new ArrayList<GuiButton>();
+            colorButtons.add(this.btnBlack = new GuiButton(Buttons.BTN_BLACK, 0, colorButY, 20, 20, "\u00a70A"));
+            colorButtons.add(this.btnDarkBlue = new GuiButton(Buttons.BTN_DARK_BLUE, 0, colorButY, 20, 20, "\u00a71A"));
+            colorButtons.add(this.btnDarkGreen = new GuiButton(Buttons.BTN_DARK_GREEN, 0, colorButY, 20, 20, "\u00a72A"));
+            colorButtons.add(this.btnDarkAqua = new GuiButton(Buttons.BTN_DARK_AQUA, 0, colorButY, 20, 20, "\u00a73A"));
+            colorButtons.add(this.btnDarkRed = new GuiButton(Buttons.BTN_DARK_RED, 0, colorButY, 20, 20, "\u00a74A"));
+            colorButtons.add(this.btnDarkPurple = new GuiButton(Buttons.BTN_DARK_PURPLE, 0, colorButY, 20, 20, "\u00a75A"));
+            colorButtons.add(this.btnGold = new GuiButton(Buttons.BTN_GOLD, 0, colorButY, 20, 20, "\u00a76A"));
+            colorButtons.add(this.btnGray = new GuiButton(Buttons.BTN_GRAY, 0, colorButY, 20, 20, "\u00a77A"));
+            colorButtons.add(this.btnDarkGray = new GuiButton(Buttons.BTN_DARK_GRAY, 0, colorButY, 20, 20, "\u00a78A"));
+            colorButtons.add(this.btnBlue = new GuiButton(Buttons.BTN_BLUE, 0, colorButY, 20, 20, "\u00a79A"));
+            colorButtons.add(this.btnGreen = new GuiButton(Buttons.BTN_GREEN, 0, colorButY, 20, 20, "\u00a7aA"));
+            colorButtons.add(this.btnAqua = new GuiButton(Buttons.BTN_AQUA, 0, colorButY, 20, 20, "\u00a7bA"));
+            colorButtons.add(this.btnRed = new GuiButton(Buttons.BTN_RED, 0, colorButY, 20, 20, "\u00a7cA"));
+            colorButtons.add(this.btnLightPurple = new GuiButton(Buttons.BTN_LIGHT_PURPLE, 0, colorButY, 20, 20, "\u00a7dA"));
+            colorButtons.add(this.btnYellow = new GuiButton(Buttons.BTN_YELLOW, 0, colorButY, 20, 20, "\u00a7eA"));
+            colorButtons.add(this.btnWhite = new GuiButton(Buttons.BTN_WHITE, 0, colorButY, 20, 20, "\u00a7fA"));
+            if (hexTextEnabled) {
+                colorButtons.add(this.btnHexColor = new GuiButton(Buttons.BTN_HEX_COLOR, 0, colorButY, 20, 20, "\u00a7#"));
+            }
+
+            int colorRowWidth = colorButtons.size() * 20;
+            int colorRowLeft = this.width / 2 - colorRowWidth / 2;
+            int colorX = colorRowLeft;
+            for (GuiButton button : colorButtons) {
+                button.xPosition = colorX;
+                button.yPosition = colorButY;
+                this.buttonList.add(button);
+                colorX += button.width;
+            }
+
+            List<GuiButton> formatButtons = new ArrayList<GuiButton>();
+            formatButtons.add(this.btnObfuscated = new GuiButton(Buttons.BTN_OBFUSCATED, 0, formatButY, 20, 20, "#"));
+            formatButtons.add(this.btnBold = new GuiButton(Buttons.BTN_BOLD, 0, formatButY, 20, 20, "\u00a7lB"));
+            formatButtons.add(this.btnStrikethrough = new GuiButton(Buttons.BTN_STRIKETHROUGH, 0, formatButY, 20, 20, "\u00a7mS"));
+            formatButtons.add(this.btnUnderline = new GuiButton(Buttons.BTN_UNDERLINE, 0, formatButY, 20, 20, "\u00a7nU"));
+            formatButtons.add(this.btnItalic = new GuiButton(Buttons.BTN_ITALIC, 0, formatButY, 20, 20, "\u00a7oI"));
+            if (hexTextEnabled) {
+                formatButtons.add(this.btnFormatG = new GuiButton(Buttons.BTN_FORMAT_G, 0, formatButY, 20, 20, "\u00a7g"));
+                formatButtons.add(this.btnFormatH = new GuiButton(Buttons.BTN_FORMAT_H, 0, formatButY, 20, 20, "\u00a7h"));
+                formatButtons.add(this.btnFormatI = new GuiButton(Buttons.BTN_FORMAT_I, 0, formatButY, 20, 20, "\u00a7i"));
+                formatButtons.add(this.btnFormatJ = new GuiButton(Buttons.BTN_FORMAT_J, 0, formatButY, 20, 20, "\u00a7j"));
+            }
+
+            int resetWidth = 100;
+            formatButtons.add(this.btnResetFormat = new GuiButton(Buttons.BTN_RESET_FORMAT, 0, formatButY, resetWidth, 20, "Reset Formatting"));
+
+            int formatRowWidth = 0;
+            for (GuiButton button : formatButtons) {
+                formatRowWidth += button.width;
+            }
+            int formatRowLeft = this.width / 2 - formatRowWidth / 2;
+            int formatX = formatRowLeft;
+            for (GuiButton button : formatButtons) {
+                button.xPosition = formatX;
+                button.yPosition = formatButY;
+                this.buttonList.add(button);
+                formatX += button.width;
             }
         } else {
             this.buttonList.add(new GuiButton(Buttons.BTN_DONE, this.width / 2 - 100, 4 + this.bookImageHeight, 200, 20, "Done"));
