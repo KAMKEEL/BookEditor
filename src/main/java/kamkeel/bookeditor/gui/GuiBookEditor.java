@@ -28,7 +28,8 @@ import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import kamkeel.bookeditor.constants.Buttons;
-import kamkeel.bookeditor.util.AngelicaUtil;
+import kamkeel.bookeditor.book.format.FormattingOptions;
+import kamkeel.bookeditor.util.BookUtil;
 
 public class GuiBookEditor extends GuiScreen {
     private Minecraft mc = Minecraft.getMinecraft();
@@ -70,6 +71,11 @@ public class GuiBookEditor extends GuiScreen {
     private GuiButton btnUnderline;
     private GuiButton btnItalic;
     private GuiButton btnResetFormat;
+    private GuiButton btnFormatG;
+    private GuiButton btnFormatH;
+    private GuiButton btnFormatI;
+    private GuiButton btnFormatJ;
+    private GuiButton btnHexColor;
     private NextPageButton btnNextPage;
     private NextPageButton btnPreviousPage;
 
@@ -83,8 +89,8 @@ public class GuiBookEditor extends GuiScreen {
     public GuiBookEditor(Book _bookClipboard, List<String> _pageClipboard) {
         this.bookClipboard = _bookClipboard;
         this.pageClipboard = _pageClipboard;
-        this.mcBookObj = AngelicaUtil.safeGetHeldItem(this.mc);
-        if (AngelicaUtil.isWritableBook(this.mcBookObj)) {
+        this.mcBookObj = BookUtil.safeGetHeldItem(this.mc);
+        if (BookUtil.isWritableBook(this.mcBookObj)) {
             this.heldBookIsWritable = true;
         } else if (this.mcBookObj == null) {
             this.mcBookObj = new ItemStack(Items.writable_book);
@@ -143,6 +149,7 @@ public class GuiBookEditor extends GuiScreen {
         int buttonSideOffset = 5;
         ScaledResolution scaledResolution = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
         int rightXPos = scaledResolution.getScaledWidth() - buttonWidth + buttonSideOffset;
+        FormattingOptions formattingOptions = FormattingOptions.defaults();
 
         if (this.heldBookIsWritable) {
             this.buttonList.add(new GuiButton(Buttons.BTN_SIGN, 5, 95, buttonWidth, buttonHeight, "Sign"));
@@ -179,6 +186,13 @@ public class GuiBookEditor extends GuiScreen {
             this.buttonList.add(this.btnUnderline = new GuiButton(Buttons.BTN_UNDERLINE, getFormatButX(Buttons.BTN_UNDERLINE), formatButY, 20, 20, "\u00a7nU"));
             this.buttonList.add(this.btnItalic = new GuiButton(Buttons.BTN_ITALIC, getFormatButX(Buttons.BTN_ITALIC), formatButY, 20, 20, "\u00a7oI"));
             this.buttonList.add(this.btnResetFormat = new GuiButton(Buttons.BTN_RESET_FORMAT, getFormatButX(Buttons.BTN_RESET_FORMAT), formatButY, 100, 20, "Reset Formatting"));
+            if (formattingOptions.hexSectionSupport()) {
+                this.buttonList.add(this.btnFormatG = new GuiButton(Buttons.BTN_FORMAT_G, getFormatButX(Buttons.BTN_FORMAT_G), formatButY, 20, 20, "\u00a7g"));
+                this.buttonList.add(this.btnFormatH = new GuiButton(Buttons.BTN_FORMAT_H, getFormatButX(Buttons.BTN_FORMAT_H), formatButY, 20, 20, "\u00a7h"));
+                this.buttonList.add(this.btnFormatI = new GuiButton(Buttons.BTN_FORMAT_I, getFormatButX(Buttons.BTN_FORMAT_I), formatButY, 20, 20, "\u00a7i"));
+                this.buttonList.add(this.btnFormatJ = new GuiButton(Buttons.BTN_FORMAT_J, getFormatButX(Buttons.BTN_FORMAT_J), formatButY, 20, 20, "\u00a7j"));
+                this.buttonList.add(this.btnHexColor = new GuiButton(Buttons.BTN_HEX_COLOR, getFormatButX(Buttons.BTN_HEX_COLOR), formatButY, 20, 20, "\u00a7#"));
+            }
         } else {
             this.buttonList.add(new GuiButton(Buttons.BTN_DONE, this.width / 2 - 100, 4 + this.bookImageHeight, 200, 20, "Done"));
         }
@@ -295,7 +309,7 @@ public class GuiBookEditor extends GuiScreen {
                 return;
         }
 
-        if (buttonPressed.id >= Buttons.BTN_BLACK && buttonPressed.id <= Buttons.BTN_RESET_FORMAT) {
+        if (buttonPressed.id >= Buttons.BTN_BLACK && buttonPressed.id <= Buttons.BTN_HEX_COLOR) {
             int pos = buttonPressed.id - Buttons.BTN_BLACK;
             this.book.addTextAtCursor(Book.FORMAT_CODES[pos]);
         } else {
