@@ -157,6 +157,22 @@ public class BookCursorHelperTest {
     }
 
     @Test
+    public void movingCursorRightStopsBeforeInlineFormatting() {
+        Book book = createTwoLineBook();
+        Line formatted = new Line();
+        formatted.text = "A\u00a7aB";
+        book.pages.get(0).lines.set(1, formatted);
+        book.cursorLine = 1;
+        book.cursorPosChars = 0;
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
+        assertThat(book.cursorPosChars, is(1));
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
+        assertThat(book.cursorPosChars, is(formatted.text.length()));
+    }
+
+    @Test
     public void movingCursorRightSkipsAmpersandCodesWhenEnabled() {
         assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
         Book book = createTwoLineBook();
@@ -168,6 +184,23 @@ public class BookCursorHelperTest {
 
         book.moveCursor(Book.CursorDirection.RIGHT);
 
+        assertThat(book.cursorPosChars, is(formatted.text.length()));
+    }
+
+    @Test
+    public void movingCursorRightStopsBeforeAmpersandFormattingWhenEnabled() {
+        assumeTrue(scenario.isHexText() && scenario.isAmpersandEnabled());
+        Book book = createTwoLineBook();
+        Line formatted = new Line();
+        formatted.text = "A&aB";
+        book.pages.get(0).lines.set(1, formatted);
+        book.cursorLine = 1;
+        book.cursorPosChars = 0;
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
+        assertThat(book.cursorPosChars, is(1));
+
+        book.moveCursor(Book.CursorDirection.RIGHT);
         assertThat(book.cursorPosChars, is(formatted.text.length()));
     }
 

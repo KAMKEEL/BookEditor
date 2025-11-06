@@ -181,27 +181,24 @@ public final class BookCursorHelper {
     }
 
     private static int skipFormattingForward(CharSequence text, int position) {
+        if (text == null) {
+            return 0;
+        }
         int length = text.length();
         int current = Math.max(0, position);
-        int searchLimit = Math.min(length, current + 16);
-        for (int search = current; search <= searchLimit; search++) {
-            int start = FormattingUtil.findFormattingCodeStart(text, search);
-            if (start >= 0 && start <= current) {
-                current = start;
-                break;
-            }
-        }
-        boolean skippedAny = false;
         while (current < length) {
-            int codeLength = FormattingUtil.detectFormattingCodeLength(text, current);
-            if (codeLength > 0) {
-                current += codeLength;
-                skippedAny = true;
-            } else {
+            int codeStart = current - 1;
+            if (codeStart < 0) {
                 break;
             }
-        }
-        if (skippedAny && current < length) {
+            int codeLength = FormattingUtil.detectFormattingCodeLength(text, codeStart);
+            if (codeLength <= 0 || codeStart + codeLength < current) {
+                break;
+            }
+            current = codeStart + codeLength;
+            if (current >= length) {
+                return length;
+            }
             current++;
         }
         return Math.min(current, length);
