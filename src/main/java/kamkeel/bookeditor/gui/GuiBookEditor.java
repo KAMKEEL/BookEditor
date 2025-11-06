@@ -454,8 +454,7 @@ public class GuiBookEditor extends GuiScreen {
         int bookLeftSide = (this.width - this.bookImageWidth) / 2;
         byte b0 = 2;
         drawTexturedModalRect(bookLeftSide, b0, 0, 0, this.bookImageWidth, this.bookImageHeight);
-        String currPageText = this.book.getCurrPageAsMCString();
-        this.fontRendererObj.drawSplitString(currPageText, bookLeftSide + 36, b0 + 16 + 16, 116, 0);
+        drawCurrentPage(bookLeftSide + 36, b0 + 16 + 16);
         String pageIndicator = String.format("Page %d of %d", new Object[]{Integer.valueOf(this.book.cursorPage + 1), Integer.valueOf(this.book.totalPages())});
         int pageIndicatorWidth = this.fontRendererObj.getStringWidth(pageIndicator);
         this.fontRendererObj.drawString(pageIndicator, bookLeftSide - pageIndicatorWidth + this.bookImageWidth - 44, b0 + 16, 0);
@@ -471,6 +470,27 @@ public class GuiBookEditor extends GuiScreen {
             drawRect(cursorX1, cursorY1, cursorX2, cursorY2, cursorColor);
         }
         super.drawScreen(par1, par2, par3);
+    }
+
+    private void drawCurrentPage(int startX, int startY) {
+        if (this.book.pages.isEmpty()) {
+            return;
+        }
+        if (this.book.cursorPage < 0 || this.book.cursorPage >= this.book.totalPages()) {
+            return;
+        }
+        Page page = this.book.pages.get(this.book.cursorPage);
+        int y = startY;
+        int linesToDraw = Math.min(page.lines.size(), 13);
+        for (int i = 0; i < linesToDraw; i++) {
+            Line line = page.lines.get(i);
+            String text = line.getTextWithWrappedFormatting();
+            if (!text.isEmpty() && text.charAt(text.length() - 1) == '\n') {
+                text = text.substring(0, text.length() - 1);
+            }
+            this.fontRendererObj.drawString(text, startX, y, 0);
+            y += 9;
+        }
     }
 
     static class NextPageButton extends GuiButton {
