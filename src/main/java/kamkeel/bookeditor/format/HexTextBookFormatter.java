@@ -110,10 +110,10 @@ public class HexTextBookFormatter extends BookFormatter {
             return true;
         }
         if (c == '&') {
-            return HexTextConfig.isAmpersandAllowed();
+            return HexText.getActiveProxy().allowUniversalAmpersand();
         }
         if (c == '<') {
-            return HexTextConfig.isRgbHtmlFormatEnabled();
+            return HexText.getActiveProxy().allowHtmlFormatting();
         }
         return false;
     }

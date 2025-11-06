@@ -60,7 +60,7 @@ public final class FormatterTestScenario {
         if (type == Type.HEX_TEXT) {
             HexTextConfig.resetToDefaults();
             if (ampersandEnabled != null) {
-                HexTextConfig.setAllowAmpersand(ampersandEnabled);
+                HexTextConfig.setUniversalAmpersandEnabled(ampersandEnabled);
             }
         }
         currentFormatter = supplier.get();
