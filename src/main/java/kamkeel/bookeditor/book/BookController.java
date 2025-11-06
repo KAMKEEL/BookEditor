@@ -94,7 +94,8 @@ public class BookController {
             Page prevPage = book.pages.get(book.cursorPage - 1);
             int lineNum = prevPage.lines.size() - 1;
             Line prevLine = prevPage.lines.get(lineNum);
-            removeText(book.cursorPage - 1, lineNum, prevLine.text.length(), book.cursorPage, book.cursorLine, book.cursorPosChars);
+            int removeIndex = Math.max(prevLine.text.length() - 1, 0);
+            removeText(book.cursorPage - 1, lineNum, removeIndex, book.cursorPage, book.cursorLine, book.cursorPosChars);
         }
     }
 

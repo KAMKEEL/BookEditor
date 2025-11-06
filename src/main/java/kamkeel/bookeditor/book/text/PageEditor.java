@@ -55,10 +55,44 @@ public final class PageEditor {
             }
             return pageOverflow.toString();
         }
+        if (overflow.isEmpty() && currentLine.text.endsWith("\n")) {
+            String newlineOverflow = ensureLineAfter(page, lineNum, currentLine, options);
+            if (!newlineOverflow.isEmpty()) {
+                overflow = newlineOverflow;
+            }
+        }
         if (!overflow.isEmpty()) {
             return insert(page, lineNum + 1, 0, overflow, options);
         }
         return "";
+    }
+
+    private static String ensureLineAfter(Page page, int lineNum, Line sourceLine, FormattingOptions options) {
+        int nextIndex = lineNum + 1;
+        String inheritedFormatting = LineEditor.collectActiveFormatting(sourceLine.getTextWithWrappedFormatting(), options);
+        if (nextIndex < page.lines.size()) {
+            Line next = page.lines.get(nextIndex);
+            if (next.text.isEmpty()) {
+                next.wrappedFormatting = inheritedFormatting;
+                return "";
+            }
+            Line blank = new Line();
+            blank.wrappedFormatting = inheritedFormatting;
+            page.lines.add(nextIndex, blank);
+        } else {
+            Line blank = new Line();
+            blank.wrappedFormatting = inheritedFormatting;
+            page.lines.add(blank);
+        }
+        if (page.lines.size() <= 13) {
+            return "";
+        }
+        StringBuilder overflow = new StringBuilder();
+        while (page.lines.size() > 13) {
+            Line removed = page.lines.remove(page.lines.size() - 1);
+            overflow.insert(0, removed.text);
+        }
+        return overflow.toString();
     }
 
     public static Page pad(Page page) {

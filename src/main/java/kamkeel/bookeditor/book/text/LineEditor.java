@@ -42,6 +42,14 @@ public final class LineEditor {
 
     private static String wrapStringToWidth(String strIn, int maxWidth, String wrappedFormatting, FormattingOptions options) {
         int maxCharsInWidth = Line.sizeStringToWidth(wrappedFormatting + strIn, maxWidth) - wrappedFormatting.length();
+        int newlineIndex = strIn.indexOf('\n');
+        if (newlineIndex >= 0 && (newlineIndex <= maxCharsInWidth || maxCharsInWidth <= 0)) {
+            int splitIndex = newlineIndex;
+            String head = strIn.substring(0, splitIndex + 1);
+            String tail = strIn.substring(splitIndex + 1);
+            wrappedFormatting = collectActiveFormatting(wrappedFormatting + head, options);
+            return head + Line.SPLIT_CHAR + wrapStringToWidth(tail, maxWidth, wrappedFormatting, options);
+        }
         if (maxCharsInWidth <= 0) {
             maxCharsInWidth = 1;
         }

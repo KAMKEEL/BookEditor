@@ -2,6 +2,7 @@ package kamkeel.bookeditor.book;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
 import org.junit.Test;
@@ -66,6 +67,46 @@ public class BookTest extends AbstractBookTest {
         book.removeChar(true);
 
         assertThat(page.lines.get(0).text, equalTo("TestMore"));
+    }
+
+    @Test
+    public void enterCreatesNewLineWithoutSecondKeypress() {
+        Book book = new Book();
+        book.pages.add(new Page());
+
+        book.addTextAtCursor("Hello");
+        book.addTextAtCursor("\n");
+
+        Page page = book.pages.get(0);
+
+        assertThat(page.lines.size(), greaterThan(1));
+        assertThat(page.lines.get(0).text, equalTo("Hello\n"));
+        assertThat(book.cursorPage, is(0));
+        assertThat(book.cursorLine, is(1));
+        assertThat(book.cursorPosChars, is(0));
+    }
+
+    @Test
+    public void backspaceAtStartOfPageDeletesPreviousPageContent() {
+        Book book = new Book();
+
+        Page first = new Page();
+        first.lines.get(0).text = "A";
+        Page second = new Page();
+        second.lines.get(0).text = "B";
+        book.pages.add(first);
+        book.pages.add(second);
+
+        book.cursorPage = 1;
+        book.cursorLine = 0;
+        book.cursorPosChars = 0;
+
+        book.removeChar(false);
+
+        assertThat(book.cursorPage, is(0));
+        assertThat(book.cursorLine, is(first.lines.size() - 1));
+        assertThat(first.lines.get(first.lines.size() - 1).text, equalTo("B"));
+        assertThat(book.totalPages(), is(1));
     }
 
     private static String repeat(char c, int count) {
