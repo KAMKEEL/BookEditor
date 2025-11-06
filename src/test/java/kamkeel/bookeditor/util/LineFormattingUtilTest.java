@@ -64,6 +64,19 @@ public class LineFormattingUtilTest {
     }
 
     @Test
+    public void wrapStringToWidthCarriesWholeWordsToNextLine() {
+        LineFormattingUtil.setMetrics(new SimpleTextMetrics(1));
+        String prefix = repeat('a', LineFormattingUtil.BOOK_TEXT_WIDTH - 1) + " ";
+        String formattedWord = "§aWord";
+        String wrapped = LineFormattingUtil.wrapStringToWidth(prefix + formattedWord, LineFormattingUtil.BOOK_TEXT_WIDTH, "");
+        String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
+        assertThat(segments.length > 1, is(true));
+        assertThat(segments[0], is(prefix));
+        assertThat(segments[1].startsWith(formattedWord), is(true));
+        assertThat(LineFormattingUtil.getActiveFormatting(segments[1]), is("§a"));
+    }
+
+    @Test
     public void getActiveFormattingAccumulatesStyles() {
         String formatted = "§aGreen §lBold";
         assertThat(LineFormattingUtil.getActiveFormatting(formatted), is("§a§l"));
@@ -79,5 +92,13 @@ public class LineFormattingUtilTest {
         int targetWidth = LineFormattingUtil.getMetrics().stringWidth(text) - 3;
         int approx = LineFormattingUtil.sizeStringToApproxWidthBlind(text, targetWidth);
         assertThat(approx >= text.length() - 1, is(true));
+    }
+
+    private static String repeat(char character, int count) {
+        StringBuilder builder = new StringBuilder(Math.max(count, 0));
+        for (int i = 0; i < count; i++) {
+            builder.append(character);
+        }
+        return builder.toString();
     }
 }

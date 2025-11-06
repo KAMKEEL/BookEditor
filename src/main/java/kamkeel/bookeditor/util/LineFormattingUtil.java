@@ -109,13 +109,23 @@ public final class LineFormattingUtil {
         if (strIn.length() <= maxCharsInWidth) {
             return strIn;
         }
-        String firstSegment = strIn.substring(0, Math.min(maxCharsInWidth, strIn.length()));
-        char splitChar = strIn.charAt(Math.min(maxCharsInWidth, strIn.length() - 1));
-        boolean newlineOrSpace = maxCharsInWidth < strIn.length() && (splitChar == ' ' || splitChar == '\n');
-        String remainder = strIn.substring(Math.min(maxCharsInWidth + (newlineOrSpace ? 1 : 0), strIn.length()));
-        if (newlineOrSpace && maxCharsInWidth < strIn.length()) {
-            firstSegment = firstSegment + splitChar;
+        int splitIndex = Math.min(maxCharsInWidth, strIn.length());
+        int whitespaceIndex = -1;
+        if (splitIndex < strIn.length()) {
+            int searchStart = Math.min(splitIndex, strIn.length() - 1);
+            for (int i = searchStart; i >= 0; i--) {
+                char current = strIn.charAt(i);
+                if (current == ' ' || current == '\n') {
+                    whitespaceIndex = i;
+                    break;
+                }
+            }
+            if (whitespaceIndex >= 0) {
+                splitIndex = whitespaceIndex + 1;
+            }
         }
+        String firstSegment = strIn.substring(0, splitIndex);
+        String remainder = strIn.substring(splitIndex);
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
         return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
     }
