@@ -282,6 +282,33 @@ public class BookCursorHelperTest {
     }
 
     @Test
+    public void addTextAtCursorWrapsFormattedWordsWithoutSplitting() {
+        LineFormattingUtil.setMetrics(new SimpleTextMetrics(10));
+        try {
+            Book book = new Book();
+            Page page = new Page();
+            page.lines.clear();
+            page.lines.add(new Line());
+            book.pages.add(page);
+            book.cursorPage = 0;
+            book.cursorLine = 0;
+            book.cursorPosChars = 0;
+
+            book.addTextAtCursor("§aWord wrap keeps words whole");
+
+            Page resultPage = book.pages.get(0);
+            Line first = resultPage.lines.get(0);
+            Line second = resultPage.lines.get(1);
+
+            assertThat(first.text.endsWith(" "), is(true));
+            assertThat(second.text.startsWith("keeps"), is(true));
+            assertThat(second.wrappedFormatting, is("§a"));
+        } finally {
+            LineFormattingUtil.setMetrics(new SimpleTextMetrics());
+        }
+    }
+
+    @Test
     public void movingCursorUpThroughBlankLinesStaysOnEachLine() {
         Book book = new Book();
         Page page = new Page();

@@ -120,11 +120,8 @@ public final class LineFormattingUtil {
         String firstSegment = strIn.substring(0, Math.min(breakIndex, strIn.length()));
         int remainderStart = Math.min(breakIndex, strIn.length());
         if (remainderStart < strIn.length()) {
-            char nextChar = strIn.charAt(remainderStart);
-            if (nextChar == ' ' || nextChar == '\n') {
-                firstSegment = firstSegment + nextChar;
-                remainderStart++;
-            }
+            remainderStart = consumeBreakWhitespace(strIn, remainderStart);
+            firstSegment = strIn.substring(0, Math.min(remainderStart, strIn.length()));
         }
         String remainder = strIn.substring(Math.min(remainderStart, strIn.length()));
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
@@ -140,7 +137,7 @@ public final class LineFormattingUtil {
             int formattingStart = FormattingUtil.findFormattingCodeStart(text, index + 1);
             if (formattingStart >= 0) {
                 int length = FormattingUtil.detectFormattingCodeLength(text, formattingStart);
-                if (length > 0 && formattingStart <= index) {
+                if (length > 0 && formattingStart <= index && index < formattingStart + length) {
                     index = formattingStart - 1;
                     continue;
                 }
@@ -152,6 +149,20 @@ public final class LineFormattingUtil {
             index--;
         }
         return -1;
+    }
+
+    private static int consumeBreakWhitespace(String text, int startIndex) {
+        int index = Math.max(0, startIndex);
+        int length = text.length();
+        while (index < length) {
+            char c = text.charAt(index);
+            if (c == ' ' || c == '\n') {
+                index++;
+                continue;
+            }
+            break;
+        }
+        return index;
     }
 
     public static String getActiveFormatting(String s) {
