@@ -484,10 +484,7 @@ public class GuiBookEditor extends GuiScreen {
         int linesToDraw = Math.min(page.lines.size(), 13);
         for (int i = 0; i < linesToDraw; i++) {
             Line line = page.lines.get(i);
-            String text = line.getTextWithWrappedFormatting();
-            if (!text.isEmpty() && text.charAt(text.length() - 1) == '\n') {
-                text = text.substring(0, text.length() - 1);
-            }
+            String text = line.getRenderableText();
             this.fontRendererObj.drawString(text, startX, y, 0);
             y += 9;
         }

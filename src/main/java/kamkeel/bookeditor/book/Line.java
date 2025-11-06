@@ -58,6 +58,31 @@ public class Line {
         return this.wrappedFormatting + this.text;
     }
 
+    public String getRenderableText() {
+        return stripLineTerminators(getTextWithWrappedFormatting());
+    }
+
+    private static String stripLineTerminators(String text) {
+        int length = text.length();
+        for (int i = 0; i < length; i++) {
+            char c = text.charAt(i);
+            if (c == '\n' || c == '\r') {
+                StringBuilder builder = new StringBuilder(length - 1);
+                if (i > 0) {
+                    builder.append(text, 0, i);
+                }
+                for (int j = i + 1; j < length; j++) {
+                    char next = text.charAt(j);
+                    if (next != '\n' && next != '\r') {
+                        builder.append(next);
+                    }
+                }
+                return builder.toString();
+            }
+        }
+        return text;
+    }
+
     public static int sizeStringToWidth(String s, int maxPx) {
         FontRenderer fr = FontRendererAccess.get();
         return fr.sizeStringToWidth(s, maxPx);

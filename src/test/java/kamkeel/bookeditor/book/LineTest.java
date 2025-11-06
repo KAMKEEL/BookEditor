@@ -73,6 +73,17 @@ public class LineTest extends AbstractBookTest {
     }
 
     @Test
+    public void renderableTextOmitsLineTerminators() {
+        Line line = new Line();
+        line.wrappedFormatting = "\u00a7a";
+        line.text = "Hello\nWorld\r";
+
+        String renderable = line.getRenderableText();
+
+        assertThat(renderable, equalTo("\u00a7aHelloWorld"));
+    }
+
+    @Test
     public void sizeStringToWidthInvokesFontRendererDirectly() {
         final FontRenderer original = fontRenderer();
         final AtomicBoolean calledViaPrivateHelper = new AtomicBoolean(false);
