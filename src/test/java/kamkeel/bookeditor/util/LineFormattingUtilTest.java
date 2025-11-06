@@ -49,6 +49,17 @@ public class LineFormattingUtilTest {
     }
 
     @Test
+    public void wrapStringToWidthMovesEntireWordWhenItDoesNotFit() {
+        String text = "Word Example";
+        int maxWidth = LineFormattingUtil.getMetrics().charWidth('a') * 10;
+        String wrapped = LineFormattingUtil.wrapStringToWidth(text, maxWidth, "");
+        String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
+        assertThat(segments.length > 1, is(true));
+        assertThat(segments[0], is("Word "));
+        assertThat(segments[1], is("Example"));
+    }
+
+    @Test
     public void listFormattedStringToWidthMaintainsFormatting() {
         List<String> segments = LineFormattingUtil.listFormattedStringToWidth("§aColoured text continues", "");
         assertThat(segments.get(0).startsWith("§a"), is(true));

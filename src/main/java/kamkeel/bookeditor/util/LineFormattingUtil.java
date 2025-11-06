@@ -109,15 +109,38 @@ public final class LineFormattingUtil {
         if (strIn.length() <= maxCharsInWidth) {
             return strIn;
         }
-        String firstSegment = strIn.substring(0, Math.min(maxCharsInWidth, strIn.length()));
-        char splitChar = strIn.charAt(Math.min(maxCharsInWidth, strIn.length() - 1));
-        boolean newlineOrSpace = maxCharsInWidth < strIn.length() && (splitChar == ' ' || splitChar == '\n');
-        String remainder = strIn.substring(Math.min(maxCharsInWidth + (newlineOrSpace ? 1 : 0), strIn.length()));
-        if (newlineOrSpace && maxCharsInWidth < strIn.length()) {
+        int firstSegmentEnd = Math.min(maxCharsInWidth, strIn.length());
+        String firstSegment = strIn.substring(0, firstSegmentEnd);
+
+        if (firstSegmentEnd < strIn.length()) {
+            int whitespaceBreak = findLastWhitespaceBreak(firstSegment);
+            if (whitespaceBreak >= 0) {
+                firstSegment = strIn.substring(0, whitespaceBreak + 1);
+                String remainder = strIn.substring(whitespaceBreak + 1);
+                String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
+                return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
+            }
+        }
+
+        int splitIndex = Math.min(firstSegmentEnd, strIn.length() - 1);
+        char splitChar = strIn.charAt(splitIndex);
+        boolean newlineOrSpace = firstSegmentEnd < strIn.length() && (splitChar == ' ' || splitChar == '\n');
+        String remainder = strIn.substring(Math.min(firstSegmentEnd + (newlineOrSpace ? 1 : 0), strIn.length()));
+        if (newlineOrSpace && firstSegmentEnd < strIn.length()) {
             firstSegment = firstSegment + splitChar;
         }
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
         return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
+    }
+
+    private static int findLastWhitespaceBreak(String segment) {
+        for (int i = segment.length() - 1; i >= 0; i--) {
+            char c = segment.charAt(i);
+            if (Character.isWhitespace(c) && i > 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public static String getActiveFormatting(String s) {
