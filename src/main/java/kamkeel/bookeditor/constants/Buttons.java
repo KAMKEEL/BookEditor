@@ -48,6 +48,11 @@ public class Buttons {
     public static final int BTN_UNDERLINE = 69;
     public static final int BTN_ITALIC = 70;
     public static final int BTN_RESET_FORMAT = 71;
+    public static final int BTN_FORMAT_G = 72;
+    public static final int BTN_FORMAT_H = 73;
+    public static final int BTN_FORMAT_I = 74;
+    public static final int BTN_FORMAT_J = 75;
+    public static final int BTN_HEX_COLOR = 76;
 
     // Sign Book Page
     public static final int BTN_SIGN_FINALISE = 5;
