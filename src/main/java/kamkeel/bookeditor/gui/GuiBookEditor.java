@@ -75,8 +75,6 @@ public class GuiBookEditor extends GuiScreen {
     private GuiButton btnFormatH;
     private GuiButton btnFormatI;
     private GuiButton btnFormatJ;
-    private GuiButton btnFormatRgb;
-    private GuiButton btnHexColor;
     private NextPageButton btnNextPage;
     private NextPageButton btnPreviousPage;
 
@@ -171,10 +169,6 @@ public class GuiBookEditor extends GuiScreen {
             colorButtons.add(this.btnLightPurple = new GuiButton(Buttons.BTN_LIGHT_PURPLE, 0, colorButY, 20, 20, "\u00a7dA"));
             colorButtons.add(this.btnYellow = new GuiButton(Buttons.BTN_YELLOW, 0, colorButY, 20, 20, "\u00a7eA"));
             colorButtons.add(this.btnWhite = new GuiButton(Buttons.BTN_WHITE, 0, colorButY, 20, 20, "\u00a7fA"));
-            if (hexTextEnabled) {
-                colorButtons.add(this.btnHexColor = new GuiButton(Buttons.BTN_HEX_COLOR, 0, colorButY, 20, 20, "\u00a7#"));
-            }
-
             int colorRowWidth = colorButtons.size() * 20;
             int colorRowLeft = this.width / 2 - colorRowWidth / 2;
             int colorX = colorRowLeft;
@@ -186,17 +180,16 @@ public class GuiBookEditor extends GuiScreen {
             }
 
             List<GuiButton> formatButtons = new ArrayList<GuiButton>();
-            formatButtons.add(this.btnObfuscated = new GuiButton(Buttons.BTN_OBFUSCATED, 0, formatButY, 20, 20, "#"));
+            formatButtons.add(this.btnObfuscated = new GuiButton(Buttons.BTN_OBFUSCATED, 0, formatButY, 20, 20, "K"));
             formatButtons.add(this.btnBold = new GuiButton(Buttons.BTN_BOLD, 0, formatButY, 20, 20, "\u00a7lB"));
             formatButtons.add(this.btnStrikethrough = new GuiButton(Buttons.BTN_STRIKETHROUGH, 0, formatButY, 20, 20, "\u00a7mS"));
             formatButtons.add(this.btnUnderline = new GuiButton(Buttons.BTN_UNDERLINE, 0, formatButY, 20, 20, "\u00a7nU"));
             formatButtons.add(this.btnItalic = new GuiButton(Buttons.BTN_ITALIC, 0, formatButY, 20, 20, "\u00a7oI"));
             if (hexTextEnabled) {
-                formatButtons.add(this.btnFormatG = new GuiButton(Buttons.BTN_FORMAT_G, 0, formatButY, 20, 20, "\u00a7g"));
-                formatButtons.add(this.btnFormatH = new GuiButton(Buttons.BTN_FORMAT_H, 0, formatButY, 20, 20, "\u00a7h"));
-                formatButtons.add(this.btnFormatI = new GuiButton(Buttons.BTN_FORMAT_I, 0, formatButY, 20, 20, "\u00a7i"));
-                formatButtons.add(this.btnFormatJ = new GuiButton(Buttons.BTN_FORMAT_J, 0, formatButY, 20, 20, "\u00a7j"));
-                formatButtons.add(this.btnFormatRgb = new GuiButton(Buttons.BTN_RGB_FORMAT, 0, formatButY, 30, 20, "RGB"));
+                formatButtons.add(this.btnFormatG = new GuiButton(Buttons.BTN_FORMAT_G, 0, formatButY, 20, 20, "\u00a7gG"));
+                formatButtons.add(this.btnFormatH = new GuiButton(Buttons.BTN_FORMAT_H, 0, formatButY, 20, 20, "\u00a7hH"));
+                formatButtons.add(this.btnFormatI = new GuiButton(Buttons.BTN_FORMAT_I, 0, formatButY, 20, 20, "\u00a7iI"));
+                formatButtons.add(this.btnFormatJ = new GuiButton(Buttons.BTN_FORMAT_J, 0, formatButY, 20, 20, "\u00a7jJ"));
             }
 
             int resetWidth = 100;
