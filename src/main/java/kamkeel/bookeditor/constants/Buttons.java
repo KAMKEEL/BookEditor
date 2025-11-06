@@ -53,6 +53,7 @@ public class Buttons {
     public static final int BTN_FORMAT_I = 74;
     public static final int BTN_FORMAT_J = 75;
     public static final int BTN_HEX_COLOR = 76;
+    public static final int BTN_RGB_FORMAT = 77;
 
     // Sign Book Page
     public static final int BTN_SIGN_FINALISE = 5;

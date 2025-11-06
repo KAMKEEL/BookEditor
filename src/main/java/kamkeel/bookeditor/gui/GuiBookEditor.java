@@ -75,6 +75,7 @@ public class GuiBookEditor extends GuiScreen {
     private GuiButton btnFormatH;
     private GuiButton btnFormatI;
     private GuiButton btnFormatJ;
+    private GuiButton btnFormatRgb;
     private GuiButton btnHexColor;
     private NextPageButton btnNextPage;
     private NextPageButton btnPreviousPage;
@@ -195,6 +196,7 @@ public class GuiBookEditor extends GuiScreen {
                 formatButtons.add(this.btnFormatH = new GuiButton(Buttons.BTN_FORMAT_H, 0, formatButY, 20, 20, "\u00a7h"));
                 formatButtons.add(this.btnFormatI = new GuiButton(Buttons.BTN_FORMAT_I, 0, formatButY, 20, 20, "\u00a7i"));
                 formatButtons.add(this.btnFormatJ = new GuiButton(Buttons.BTN_FORMAT_J, 0, formatButY, 20, 20, "\u00a7j"));
+                formatButtons.add(this.btnFormatRgb = new GuiButton(Buttons.BTN_RGB_FORMAT, 0, formatButY, 30, 20, "RGB"));
             }
 
             int resetWidth = 100;
@@ -331,6 +333,8 @@ public class GuiBookEditor extends GuiScreen {
         if (buttonPressed.id >= Buttons.BTN_BLACK && buttonPressed.id <= Buttons.BTN_HEX_COLOR) {
             int pos = buttonPressed.id - Buttons.BTN_BLACK;
             this.book.addTextAtCursor(Book.FORMAT_CODES[pos]);
+        } else if (buttonPressed.id == Buttons.BTN_RGB_FORMAT) {
+            this.book.addTextAtCursor("\u00a7#");
         } else {
             System.out.println("Unhandled button ID: " + buttonPressed.id);
         }
