@@ -2,6 +2,9 @@ package kamkeel.bookeditor.book.format;
 
 import java.util.Objects;
 
+import kamkeel.bookeditor.BookEditor;
+import kamkeel.bookeditor.compat.HexTextCompat;
+
 /**
  * Immutable snapshot describing which formatting syntaxes should be recognised
  * while editing a book. The options are derived from the runtime environment
@@ -23,7 +26,7 @@ public final class FormattingOptions {
     public static FormattingOptions defaults() {
         FormattingOptions options = cachedDefaults;
         if (options == null) {
-            options = HexTextIntegration.detectOptions();
+            options = HexTextCompat.loadFormattingOptions(BookEditor.HEX_TEXT_ENABLED);
             cachedDefaults = options;
         }
         return options;

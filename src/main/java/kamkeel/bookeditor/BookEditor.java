@@ -7,6 +7,7 @@ package kamkeel.bookeditor;
  */
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
@@ -15,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kamkeel.bookeditor.book.Book;
+import kamkeel.bookeditor.gui.GuiBookEditor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
-import kamkeel.bookeditor.gui.GuiBookEditor;
 
 import static kamkeel.bookeditor.BookEditor.*;
 
@@ -27,6 +28,8 @@ public class BookEditor {
     public static final String MODID = "bookeditor";
     public static final String VERSION = "1.0";
     public static final String NAME = "Book Editor";
+
+    public static final boolean HEX_TEXT_ENABLED = detectHexText();
 
     private Minecraft mc = Minecraft.getMinecraft();
 
@@ -66,5 +69,13 @@ public class BookEditor {
             if (!this.connected &&
                     this.connectWait-- <= 0)
                 this.connected = true;
+    }
+
+    private static boolean detectHexText() {
+        try {
+            return Loader.isModLoaded("hextext");
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 }
