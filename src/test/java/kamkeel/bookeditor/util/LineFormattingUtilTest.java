@@ -49,6 +49,15 @@ public class LineFormattingUtilTest {
     }
 
     @Test
+    public void wrapStringToWidthAvoidsSplittingWordsWhenPossible() {
+        String wrapped = LineFormattingUtil.wrapStringToWidth("Word wrap should stay intact", 24, "");
+        String[] segments = wrapped.split(String.valueOf(Line.SPLIT_CHAR));
+        assertThat(segments.length > 1, is(true));
+        assertThat(segments[0].endsWith(" "), is(true));
+        assertThat(segments[1].startsWith("wrap"), is(true));
+    }
+
+    @Test
     public void listFormattedStringToWidthMaintainsFormatting() {
         List<String> segments = LineFormattingUtil.listFormattedStringToWidth("§aColoured text continues", "");
         assertThat(segments.get(0).startsWith("§a"), is(true));

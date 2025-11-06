@@ -109,15 +109,49 @@ public final class LineFormattingUtil {
         if (strIn.length() <= maxCharsInWidth) {
             return strIn;
         }
-        String firstSegment = strIn.substring(0, Math.min(maxCharsInWidth, strIn.length()));
-        char splitChar = strIn.charAt(Math.min(maxCharsInWidth, strIn.length() - 1));
-        boolean newlineOrSpace = maxCharsInWidth < strIn.length() && (splitChar == ' ' || splitChar == '\n');
-        String remainder = strIn.substring(Math.min(maxCharsInWidth + (newlineOrSpace ? 1 : 0), strIn.length()));
-        if (newlineOrSpace && maxCharsInWidth < strIn.length()) {
-            firstSegment = firstSegment + splitChar;
+        int breakIndex = Math.min(maxCharsInWidth, strIn.length());
+        if (breakIndex < strIn.length()) {
+            int wordBoundary = findLastBreakOpportunity(strIn, breakIndex);
+            if (wordBoundary >= 0) {
+                breakIndex = wordBoundary + 1;
+            }
         }
+
+        String firstSegment = strIn.substring(0, Math.min(breakIndex, strIn.length()));
+        int remainderStart = Math.min(breakIndex, strIn.length());
+        if (remainderStart < strIn.length()) {
+            char nextChar = strIn.charAt(remainderStart);
+            if (nextChar == ' ' || nextChar == '\n') {
+                firstSegment = firstSegment + nextChar;
+                remainderStart++;
+            }
+        }
+        String remainder = strIn.substring(Math.min(remainderStart, strIn.length()));
         String formatting = getActiveFormatting(wrappedFormatting + firstSegment);
         return firstSegment + '\u00b7' + wrapStringToWidth(remainder, maxWidth, formatting);
+    }
+
+    private static int findLastBreakOpportunity(String text, int limitExclusive) {
+        if (text == null || limitExclusive <= 0) {
+            return -1;
+        }
+        int index = Math.min(limitExclusive, text.length()) - 1;
+        while (index >= 0) {
+            int formattingStart = FormattingUtil.findFormattingCodeStart(text, index + 1);
+            if (formattingStart >= 0) {
+                int length = FormattingUtil.detectFormattingCodeLength(text, formattingStart);
+                if (length > 0 && formattingStart <= index) {
+                    index = formattingStart - 1;
+                    continue;
+                }
+            }
+            char current = text.charAt(index);
+            if (current == ' ' || current == '\n') {
+                return index;
+            }
+            index--;
+        }
+        return -1;
     }
 
     public static String getActiveFormatting(String s) {
