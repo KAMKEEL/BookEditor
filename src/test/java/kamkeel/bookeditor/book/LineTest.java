@@ -34,6 +34,15 @@ public class LineTest extends AbstractBookTest {
     }
 
     @Test
+    public void listFormattedStringToWidthPrefersWhitespaceBreaks() {
+        java.util.List<String> lines = Line.listFormattedStringToWidth("Hello my name is GIANT WORLD", "");
+
+        assertThat(lines.size(), is(2));
+        assertThat(lines.get(0), equalTo("Hello my name is "));
+        assertThat(lines.get(1), equalTo("GIANT WORLD"));
+    }
+
+    @Test
     public void addTextRespectsInsertionPosition() {
         Line line = new Line();
         line.text = "Hello";

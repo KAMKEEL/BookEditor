@@ -41,18 +41,59 @@ public final class LineEditor {
     }
 
     private static String wrapStringToWidth(String strIn, int maxWidth, String wrappedFormatting, FormattingOptions options) {
-        int maxCharsInWidth = Line.sizeStringToWidth(wrappedFormatting + strIn, maxWidth) - wrappedFormatting.length();
-        if (strIn.length() <= maxCharsInWidth) {
+        int splitIndex = findSplitIndex(strIn, maxWidth, wrappedFormatting, options);
+        if (splitIndex >= strIn.length()) {
             return strIn;
         }
-        String s1 = strIn.substring(0, maxCharsInWidth);
-        char c0 = strIn.charAt(maxCharsInWidth);
-        boolean newlineOrSpace = c0 == ' ' || c0 == '\n';
-        String s2 = strIn.substring(maxCharsInWidth + (newlineOrSpace ? 1 : 0));
-        if (newlineOrSpace) {
-            s1 = s1 + c0;
+
+        String firstSegment = strIn.substring(0, splitIndex);
+        char nextChar = strIn.charAt(splitIndex);
+        boolean consumeNext = nextChar == ' ' || nextChar == '\n';
+        String remaining = strIn.substring(splitIndex + (consumeNext ? 1 : 0));
+        if (consumeNext) {
+            firstSegment = firstSegment + nextChar;
         }
-        wrappedFormatting = collectActiveFormatting(wrappedFormatting + s1, options);
-        return s1 + Line.SPLIT_CHAR + wrapStringToWidth(s2, maxWidth, wrappedFormatting, options);
+
+        wrappedFormatting = collectActiveFormatting(wrappedFormatting + firstSegment, options);
+        return firstSegment + Line.SPLIT_CHAR + wrapStringToWidth(remaining, maxWidth, wrappedFormatting, options);
+    }
+
+    private static int findSplitIndex(String text, int maxWidth, String wrappedFormatting, FormattingOptions options) {
+        if (text.isEmpty()) {
+            return 0;
+        }
+
+        int maxChars = Line.sizeStringToWidth(wrappedFormatting + text, maxWidth) - wrappedFormatting.length();
+        if (maxChars >= text.length()) {
+            return text.length();
+        }
+
+        int searchBound = Math.min(maxChars, text.length() - 1);
+        int newlineIndex = text.lastIndexOf('\n', searchBound);
+        if (newlineIndex >= 0) {
+            return newlineIndex;
+        }
+
+        int spaceIndex = findLastBreakOpportunity(text, searchBound, options);
+        if (spaceIndex >= 0) {
+            return spaceIndex;
+        }
+
+        return Math.max(1, maxChars);
+    }
+
+    private static int findLastBreakOpportunity(String text, int start, FormattingOptions options) {
+        for (int i = start; i >= 0; i--) {
+            char current = text.charAt(i);
+            if (current == ' ' || current == '\n') {
+                return i;
+            }
+
+            int formattingLength = FormattingUtil.detectFormattingCodeLength(text, i, options);
+            if (formattingLength > 0) {
+                i -= formattingLength - 1;
+            }
+        }
+        return -1;
     }
 }
