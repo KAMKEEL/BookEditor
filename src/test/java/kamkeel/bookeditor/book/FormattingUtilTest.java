@@ -27,6 +27,16 @@ public class FormattingUtilTest {
     }
 
     @Test
+    public void ignoreAmpersandFormattingWhenDisabled() {
+        FormattingOptions options = FormattingOptions.of(false, false, true);
+        String text = "&aHello";
+        int len = FormattingUtil.detectFormattingCodeLength(text, 0, options);
+        assertThat(len, is(0));
+        String active = FormattingUtil.collectActiveFormatting(text, options);
+        assertThat(active, equalTo(""));
+    }
+
+    @Test
     public void htmlFormattingProducesEquivalentActiveFormatting() {
         FormattingOptions options = FormattingOptions.of(false, true, true);
         String html = "<#123456>Line";

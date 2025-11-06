@@ -23,16 +23,9 @@ public final class HexTextIntegration {
             if (Loader.isModLoaded(MOD_ID)) {
                 Object proxy = resolveProxy();
                 if (proxy != null) {
-                    ampersand = invokeBoolean(proxy, "allowUniversalAmpersand")
-                        || invokeBoolean(proxy, "convertAmpersandsOnSigns")
-                        || invokeBoolean(proxy, "convertAmpersandsInChat")
-                        || invokeBoolean(proxy, "convertAmpersandsInRepairs");
+                    ampersand = invokeBoolean(proxy, "allowUniversalAmpersand");
                     html = invokeBoolean(proxy, "allowHtmlFormatting");
                     hexSection = true; // Hex Text always understands section based hex codes when present
-                } else {
-                    ampersand = true;
-                    html = true;
-                    hexSection = true;
                 }
             }
         } catch (Throwable ignored) {
